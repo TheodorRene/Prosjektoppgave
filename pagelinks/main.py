@@ -1,9 +1,9 @@
-from revision import WikiPagelinkSet
-from utils.timer import timeit
+from wiki_pagelink_set import WikiPagelinkSet
+from utils.timer import Timer
 
-@timeit
-def __main__():
-    start_page = WikiPagelinkSet("Erna Solberg", 1)
+
+def __main__(t):
+    start_page = WikiPagelinkSet("Erna Solberg", 1, t)
     pages = [start_page]
     pages_seen = []
 
@@ -13,7 +13,9 @@ def __main__():
 
         new_pages = [page for page in next_page.propagate() if page.topic not in pages_seen]
         pages.extend(new_pages)
-    
+
 
 if __name__ == "__main__":
-    __main__()
+    t = Timer()
+    t.timeit(__main__)(t)
+    print(t.funcs)

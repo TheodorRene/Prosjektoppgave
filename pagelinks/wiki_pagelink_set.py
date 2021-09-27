@@ -4,23 +4,26 @@ import re
 class WikiPagelinkSet:
     """ Class containing all internal Wikipedia links for a single Wikipedia site. """
 
-    def __init__(self, topic, depth):
+    def __init__(self, topic, depth,t):
         """ Initialize by translating topic to be on a WikiAPI accepted format. """
         self.topic = topic.replace(" ", "_")
         self.links = {}
         self.depth = depth
+        self.t = t
 
     def add_link(self, link):
         try:
             self.links[link] += 1
         except KeyError:
             self.links[link] = 0
-    
+
+    def do_request(self, url):
+        return requests.get(url)
+
     def get_links_from_wiki(self):
         """ Send request to Wikipedia API, parse and get all internal wikipedia links. """
         url = f"""https://en.wikipedia.org/w/api.php?action=query&format=json&prop=revisions&rvlimit=20&titles={self.topic}&rvlimit=max&rvprop=timestamp|content"""
-
-        response = requests.get(url)
+        response = self.t.timeit(self.do_request)(url)
         pages = response.json()["query"]["pages"]
         page_id = list(pages.keys())[0]
 
@@ -49,7 +52,7 @@ class WikiPagelinkSet:
 
         next_pages = []
         for link in self.links.keys():
-            link_revision = WikiPagelinkSet(link, self.depth + 1)
+            link_revision = WikiPagelinkSet(link, self.depth + 1, self.t)
             next_pages.append(link_revision)
 
         return next_pages

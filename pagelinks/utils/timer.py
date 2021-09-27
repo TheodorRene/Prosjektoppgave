@@ -1,16 +1,23 @@
 import time
 
 
-def timeit(f):
-    """Decorator to time a function."""
-    def timed(*args, **kw):
+class Timer:
+    def __init__(self):
+        self.funcs = {}
 
-        ts = time.time()
-        result = f(*args, **kw)
-        te = time.time()
+    def timeit(self, f):
+        """Decorator to time a function."""
+        def timed(*args, **kw):
 
-        print('func:%r args:[%r, %r] took: %2.4f sec' % \
-          (f.__name__, args, kw, te-ts))
-        return result
+            ts = time.time()
+            result = f(*args, **kw)
+            te = time.time()
 
-    return timed
+            fname = f.__name__
+            self.funcs[fname] = self.funcs.setdefault(fname, 0) + te-ts
+
+            print('func:%r args:[%r, %r] took: %2.4f sec' %
+                  (f.__name__, args, kw, te-ts))
+            return result
+
+        return timed
