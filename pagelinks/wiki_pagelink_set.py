@@ -4,7 +4,7 @@ import re
 class WikiPagelinkSet:
     """ Class containing all internal Wikipedia links for a single Wikipedia site. """
 
-    def __init__(self, topic, depth,t):
+    def __init__(self, topic, depth, t):
         """ Initialize by translating topic to be on a WikiAPI accepted format. """
         self.topic = topic.replace(" ", "_")
         self.links = {}
