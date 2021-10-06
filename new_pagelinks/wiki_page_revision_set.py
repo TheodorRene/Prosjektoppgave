@@ -1,4 +1,4 @@
-import requests
+import grequests
 import re
 
 from revision import Revision
@@ -13,35 +13,28 @@ WIKIPEDIA_API_URL = "https://en.wikipedia.org/w/api.php"
 class WikiPageRevisionSet:
     """ Class containing all internal Wikipedia links for a single Wikipedia site. """
 
-    def __init__(self, topic, depth, request_session=None):
+    def __init__(self, topic, depth):
         """ Initialize by translating topic to be on a WikiAPI accepted format. """
-        self.session = request_session if request_session else requests.Session()
         self.topic = topic.replace(" ", "_")
-        self.revisions = self.get_revisions()
+        self.revisions = [] #self.get_revisions()
+        self.next_url = create_url()
         self.depth = depth
 
-    def _get_default_params(self):
-        return {
-            "action": "query",
-            "format": "json",
-            "prop": "revisions",
-            "rvlimit": "max",
-            "titles": self.topic,
-            "rvprop": "timestamp|ids|content",
-            "rvstart": END_DATE,
-            "rvend": START_DATE
-        }
+    def create_url(self, rvcontinue=None):
+        if rvcontinue:
+            return f"https://en.wikipedia.org/w/api.php?action=query&format=json&prop=revisions&rvlimit=max&titles={self.topic}&rvprop=timestamp|ids|content&rvstart=2021-06-30T23:59:59&rvend=2021-01-01T00:00:01&rvcontinue={rvcontinue}"
+        return  f"https://en.wikipedia.org/w/api.php?action=query&format=json&prop=revisions&rvlimit=max&titles={self.topic}&rvprop=timestamp|ids|content&rvstart=2021-06-30T23:59:59&rvend=2021-01-01T00:00:01"
+
 
     def get_revisions(self):
         """
         Get revision data for a single topic.
         NOTE: The revision timelime is backwards, hence rvstart is the END_DATE.
-        """
-        params = self._get_default_params()
-        
-        response = self.session.get(url=WIKIPEDIA_API_URL, params=params)
+        """        
+        rs = (grequests.get(u) for u in [self.create_urls()])
+        response = grequests.map(rs)
         try:
-            revisions = self.parse_revisions(response)
+            revisions = self.parse_revisions(response[0])
             return revisions
         except DeadLinkException:
             return None
@@ -50,6 +43,7 @@ class WikiPageRevisionSet:
         """
         Create Revision objects out of the response
         """
+        print(type(response.json()))
         topic_id = self.get_topic_id(response)
         if topic_id == "-1":
             raise DeadLinkException
@@ -91,7 +85,7 @@ class WikiPageRevisionSet:
         params = self._get_default_params()
         while "continue" in response.json():
             params["rvcontinue"] = response.json()["continue"]["rvcontinue"]
-            response = self.session.get(url=WIKIPEDIA_API_URL, params=params)
+            response = grequests.map([grequests.get(WIKIPEDIA_API_URL, data=params)])
             pages.append(response)
 
         return pages
