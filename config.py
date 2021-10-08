@@ -12,6 +12,6 @@ pagelinks_config = {
     "debug":True,
     "host":"localhost",
     "user":"root",
-    "password":"my-secret-pw"
-    "database":"pagelinks-db"
+    "password":"my-secret-pw",
+    "database":"gurba"
 }
