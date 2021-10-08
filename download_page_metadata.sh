@@ -7,4 +7,4 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 arg1=$1
-curl https://dumps.wikimedia.org/nowiki/${arg1}/nowiki-${arg1}-page.sql.gz -o page_${arg1}.sql.gz && gzip -d page_${arg1}
+curl https://dumps.wikimedia.org/nowiki/${arg1}/nowiki-${arg1}-page.sql.gz -o page_${arg1}.sql.gz && gzip -d page_${arg1}.sql.gz
