@@ -7,3 +7,11 @@ config = {
         "only_norway":True,
         "only_pages":True
         }
+
+pagelinks_config = {
+    "debug":True,
+    "host":"localhost",
+    "user":"root",
+    "password":"my-secret-pw"
+    "database":"pagelinks-db"
+}
