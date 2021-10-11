@@ -2,16 +2,16 @@ config = {
         "debug":False,
         "uri":"bolt://localhost:7687",
         "user": "neo4j",
-        "password":"s3cr3t",
+        "password":"QM6yBEkttU7VWx",
         "dry_run":True,
         "only_norway":True,
         "only_pages":True
         }
 
 pagelinks_config = {
-    "debug":True,
+    "debug":False,
     "host":"localhost",
     "user":"root",
     "password":"my-secret-pw",
-    "database":"gurba"
+    "database":"pagelinks-db"
 }
