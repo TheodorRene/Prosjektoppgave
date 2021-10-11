@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 if [ $# -eq 0 ]; then
     echo "No date argument given. Format: YYYYMMDD"
     exit 1

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 if [ $# -eq 0 ]; then
     echo "No date argument given. Format: YYYYMMDD"
     echo "This data is not updated as often. Here are the possible values:"
