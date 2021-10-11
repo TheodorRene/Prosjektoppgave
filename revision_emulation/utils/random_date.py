@@ -1,12 +1,8 @@
 import random
 import time
 
-def random_date(start, end):
-    """Get a random timestamp between two timestamps"""
-    return _str_time_prop(start, end, '%Y-%m-%dT%H:%M:%S')
-
-def _str_time_prop(start, end, time_format):
-    """Get a time at a proportion of a range of two formatted times.
+def random_date(start, end, time_format='%Y-%m-%dT%H:%M:%S'):
+    """Get a time between a range of two formatted times.
 
     start and end should be strings specifying times formatted in the
     given format (strftime-style), giving an interval [start, end].
