@@ -1,4 +1,6 @@
-from utils import random_date
+from utils.constants import MONTHS, START, END
+from utils.random_date import random_date
+
 
 import random
 import math
@@ -10,7 +12,7 @@ class WikiSite:
         self.monthly_update_rate = self._emulate_monthly_update_rate()
 
     def _initialize_revisions(self, newest_revision_links):
-        revisions = { "newest": newest_revision_links }
+        revisions = { END: newest_revision_links }
         return revisions 
     
     def _emulate_monthly_update_rate(self):
@@ -25,13 +27,27 @@ class WikiSite:
         Generate revisions based on the monthly update rate
         TODO: Generate for a given time frame. Currently only calculates for one month.
         """
-        MONTHS = 1
-        START = "2021-01-01T00:00:01"
-        END = "2021-02-01T23:59:59"
-        for i in range(self.monthly_update_rate * MONTHS):
-            revision_timestamp = random_date(START, END)
-            copy = [entry for entry in self.revisions["newest"]]
-            self.revisions[revision_timestamp] = WikiSite.simulate_link_updates(copy)
+        timestamps = self.generate_timestamps()
+        for index, timestamp in enumerate(timestamps):
+            if index != 0:
+                copy = [entry for entry in self.revisions[previous_timestamp]]
+                self.revisions[timestamp] = WikiSite.simulate_link_updates(copy)
+
+            previous_timestamp = timestamp
+        
+            
+    def generate_timestamps(self):
+        """Generate a sorted list with timestamps, including the END timestamp"""
+        timestamps = [END]
+        for _ in range(self.monthly_update_rate * MONTHS):
+            timestamps.append(random_date(START, END))
+        timestamps.sort(reverse=True)
+        return timestamps
+
+    def to_csv_format(self):
+        return [[self.topic, key, value] for (key, value) in self.revisions.items()]
+
+
 
     @staticmethod
     def simulate_link_updates(newest_topics):
@@ -47,7 +63,7 @@ class WikiSite:
         """
         LINK_LOSS_PROBABILITY = 0.1
         lost_topic_count = math.ceil(LINK_LOSS_PROBABILITY * len(topics))
-        for i in range(lost_topic_count):
+        for _ in range(lost_topic_count):
             random_topic = random.choice(topics)
             topics.remove(random_topic)
         return topics
@@ -61,7 +77,7 @@ class WikiSite:
         ALL_TOPICS = ["Sau", "Geit", "Danmark", "Finland", "Finnmark", "Viken", "Belgia", "Paris", "Madrid", "Støre"]
         LINK_GAIN_PROBABILITY = 0.1
         gained_topic_count = math.ceil(LINK_GAIN_PROBABILITY * len(topics))
-        for i in range(gained_topic_count):
+        for _ in range(gained_topic_count):
             random_topic = random.choice(ALL_TOPICS)
             if not random_topic in topics:
                 topics.append(random_topic)
