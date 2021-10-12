@@ -30,13 +30,9 @@ def get_correct_format(x):
     return f"{x[0]} {x[1].decode()} {x[2]} {x[3].decode()}"
 
 def get_n4j_query(x, format=False):
-    cypher2 = "MERGE (p1:Page {{id:{from_page_id}, title:'{from_page_title}'}}) " + \
-              "MERGE (p2:Page {{id:{to_page_id}, title:'{to_page_title}'}}) "  + \
-              "CREATE (p1) -[rel:LINKS_TO]-> (p2) "
     cypher_escaped = "MERGE (p1:Page {id:$from_page_id, title:$from_page_title}) " + \
               "MERGE (p2:Page {id:$to_page_id, title:$to_page_title}) "  + \
               "CREATE (p1) -[rel:LINKS_TO]-> (p2) "
-    #return cypher2.format(from_page_id=x[0], from_page_title=x[1].decode(), to_page_id=x[2], to_page_title=x[3].decode())
     return cypher_escaped
 
 
@@ -47,13 +43,12 @@ def get_kwargs(x):
         "to_page_id":x[2],
         "to_page_title":x[3].decode()
     }
+
 def do_query(tx, string):
     return tx.run(string)
 
 def do_query_with_args(tx, string, args_dict):
     return tx.run(string, args_dict)
-
-
 
 if __name__=="__main__":
     db = mysql.connector.connect(
