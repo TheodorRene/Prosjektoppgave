@@ -11,8 +11,8 @@ def insert_line_neo4j(tx, parsed_tuple, hourly_counts)->None:
     :param hourly_counts: [(hour,count)] List of tuples with hourly pageviews
     :return: None, only sideffects
     """
-    assert len(parsed_tuple) == 6
-    (wiki_code, article_title, page_id, _, _, _) = parsed_tuple
+    assert len(parsed_tuple) == 5
+    (wiki_code, article_title, page_id, _, _) = parsed_tuple
     if c["debug"]:
         print("INSERTING")
     for (hour, count) in hourly_counts:
@@ -27,7 +27,7 @@ def generate_ssv_for_line(parsed_tuple, hourly_counts):
     """
     Converts our originally parsed tuple into a list of strings with space separated values using hourly_counts
     """
-    (wiki_code, article_title, page_id, _, _, _) = parsed_tuple
+    (wiki_code, article_title, page_id, _, _) = parsed_tuple
     data = []
     for (hour, count) in hourly_counts:
         data.append(" ".join([wiki_code, article_title, page_id, str(hour), str(count)]))
@@ -73,12 +73,14 @@ def parse_line(line):
     """
     try:
         (wiki_code, article_title, page_id,
-         daily_total,_, hourly_counts) = line.strip().split(" ")
+         user_agent, daily_total, hourly_counts) = line.strip().split(" ")
         predicates = []
         if c["only_norway"]:
             predicates.append(wiki_code == "no.wikipedia")
         if c["only_pages"]:
             predicates.append(not article_title.startswith("Fil:"))
+        if c["only_include_desktop"]:
+            predicates.append( user_agent=="desktop" )
         return (wiki_code, article_title, page_id, daily_total, hourly_counts) if all(predicates) else None
     except:
         print("Could not parse this line", line)
