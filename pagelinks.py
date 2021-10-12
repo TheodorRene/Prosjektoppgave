@@ -62,7 +62,6 @@ if __name__=="__main__":
         password=c["password"],
         database=c["database"]
     )
-    neo4j_driver = GraphDatabase.driver(c2["uri"], auth=(c2["user"], c2["password"]))
     cursor = db.cursor()
 
     query = get_query()
@@ -71,11 +70,14 @@ if __name__=="__main__":
     result = cursor.fetchall()
 
 
-    with neo4j_driver.session() as s:
+    if c["dry_run"]:
         for x in result:
-            #print(get_correct_format(x))
-            #print(get_n4j_query(x))
-            kwargs = get_kwargs(x)
-            s.write_transaction(do_query_with_args, get_n4j_query(x), kwargs)
+            print(get_correct_format(x))
+    else:
+        neo4j_driver = GraphDatabase.driver(c2["uri"], auth=(c2["user"], c2["password"]))
+        with neo4j_driver.session() as s:
+            for x in result:
+                kwargs = get_kwargs(x)
+                s.write_transaction(do_query_with_args, get_n4j_query(x), kwargs)
 
 

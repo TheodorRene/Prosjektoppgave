@@ -5,7 +5,8 @@ config = {
         "password":"QM6yBEkttU7VWx",
         "dry_run":True,
         "only_norway":True,
-        "only_pages":True
+        "only_pages":True,
+        "only_include_desktop":True
         }
 
 pagelinks_config = {
@@ -13,5 +14,6 @@ pagelinks_config = {
     "host":"localhost",
     "user":"root",
     "password":"my-secret-pw",
-    "database":"pagelinks-db"
+    "database":"pagelinks-db",
+    "dry_run":True
 }
