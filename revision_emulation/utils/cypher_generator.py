@@ -17,9 +17,9 @@ class RevisionCypherQueryGenerator(CypherQueryGenerator):
     @staticmethod
     def insert_revision(csv_line):
         """TODO: Do something with the insert statement, e.g. store the text in a file"""
-        topic, timestamp, revisions = csv_line
+        title, timestamp, revisions = csv_line
         revisions = ast.literal_eval(revisions) # Evaluate revisions as a list and not as a string
         
         for revision in revisions:
-            insert_statement = RevisionCypherQueryGenerator.insert_relation(from_node=topic, to_node=revision, node_type="WikiSite", id_field="topic_name", properties=f"{{timestamp: {timestamp}}}", relation_name="LINKS_TO")
+            insert_statement = RevisionCypherQueryGenerator.insert_relation(from_node=title, to_node=revision, node_type="Page", id_field="title", properties=f"{{timestamp: {timestamp}}}", relation_name="LINKS_TO")
             print(insert_statement)

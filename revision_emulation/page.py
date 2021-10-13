@@ -5,9 +5,9 @@ from utils.random_date import random_date
 import random
 import math
 
-class WikiSite:
-    def __init__(self, topic, newest_revision_links):
-        self.topic = topic
+class Page:
+    def __init__(self, title, newest_revision_links):
+        self.title = title
         self.revisions = self._initialize_revisions(newest_revision_links)
         self.monthly_update_rate = self._emulate_monthly_update_rate()
 
@@ -31,7 +31,7 @@ class WikiSite:
         for index, timestamp in enumerate(timestamps):
             if index != 0:
                 copy = [entry for entry in self.revisions[previous_timestamp]]
-                self.revisions[timestamp] = WikiSite.simulate_link_updates(copy)
+                self.revisions[timestamp] = Page.simulate_link_updates(copy)
 
             previous_timestamp = timestamp
         
@@ -45,42 +45,40 @@ class WikiSite:
         return timestamps
 
     def to_csv_format(self):
-        return [[self.topic, key, value] for (key, value) in self.revisions.items()]
-
-
+        return [[self.title, key, value] for (key, value) in self.revisions.items()]
 
     @staticmethod
-    def simulate_link_updates(newest_topics):
-        new_topics = WikiSite.simulate_link_loss(newest_topics)
-        new_topics = WikiSite.simulate_link_gain(new_topics)
-        return new_topics
+    def simulate_link_updates(newest_link_titles):
+        new_link_titles = Page.simulate_link_loss(newest_link_titles)
+        new_link_titles = Page.simulate_link_gain(new_link_titles)
+        return new_link_titles
 
     @staticmethod
-    def simulate_link_loss(topics):
+    def simulate_link_loss(link_titles):
         """
         Simulate a link loss based on a probability of losing a link
         TODO: Define a link loss probability distribution based on real data set
         """
         LINK_LOSS_PROBABILITY = 0.1
-        lost_topic_count = math.ceil(LINK_LOSS_PROBABILITY * len(topics))
-        for _ in range(lost_topic_count):
-            random_topic = random.choice(topics)
-            topics.remove(random_topic)
-        return topics
+        lost_link_count = math.ceil(LINK_LOSS_PROBABILITY * len(link_titles))
+        for _ in range(lost_link_count):
+            random_title = random.choice(link_titles)
+            link_titles.remove(random_title)
+        return link_titles
 
     @staticmethod
-    def simulate_link_gain(topics):
+    def simulate_link_gain(link_titles):
         """
         Simulate link gain based on a probability of gaining a random link
-        TODO: Define whith topics can be linked. 
+        TODO: Define whith link_titles can be linked. 
         """
-        ALL_TOPICS = ["Sau", "Geit", "Danmark", "Finland", "Finnmark", "Viken", "Belgia", "Paris", "Madrid", "Støre"]
+        ALL_LINK_TITLES = ["Sau", "Geit", "Danmark", "Finland", "Finnmark", "Viken", "Belgia", "Paris", "Madrid", "Støre"]
         LINK_GAIN_PROBABILITY = 0.1
-        gained_topic_count = math.ceil(LINK_GAIN_PROBABILITY * len(topics))
-        for _ in range(gained_topic_count):
-            random_topic = random.choice(ALL_TOPICS)
-            if not random_topic in topics:
-                topics.append(random_topic)
-        return topics
+        gained_link_count = math.ceil(LINK_GAIN_PROBABILITY * len(link_titles))
+        for _ in range(gained_link_count):
+            random_title = random.choice(ALL_LINK_TITLES)
+            if not random_title in link_titles:
+                link_titles.append(random_title)
+        return link_titles
 
     
