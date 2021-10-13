@@ -9,8 +9,8 @@ class CypherQueryGenerator:
                 MATCH
                 (a:{node_type}),
                 (b:{node_type})
-                WHERE a.{id_field} = {from_node} AND b.{id_field} = {to_node}
-                CREATE (a)-[:{relation_name} {properties if properties else ""}]->(b)
+                WHERE a.{id_field} = '{from_node}' AND b.{id_field} = '{to_node}'
+                CREATE (a)-[:{relation_name} {properties if properties else ""}]->(b);
                """
 
 class RevisionCypherQueryGenerator(CypherQueryGenerator):
@@ -21,5 +21,5 @@ class RevisionCypherQueryGenerator(CypherQueryGenerator):
         revisions = ast.literal_eval(revisions) # Evaluate revisions as a list and not as a string
         
         for revision in revisions:
-            insert_statement = RevisionCypherQueryGenerator.insert_relation(from_node=title, to_node=revision, node_type="Page", id_field="title", properties=f"{{timestamp: {timestamp}}}", relation_name="LINKS_TO")
+            insert_statement = RevisionCypherQueryGenerator.insert_relation(from_node=title, to_node=revision, node_type="Page", id_field="title", properties=f"{{timestamp: '{timestamp}'}}", relation_name="LINKS_TO")
             print(insert_statement)
