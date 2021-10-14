@@ -1,6 +1,9 @@
-from neo4j import GraphDatabase
+from datetime import datetime
 from string import ascii_uppercase
 from sys import argv
+
+from neo4j import GraphDatabase
+
 from config import config as c
 
 
@@ -15,13 +18,13 @@ def insert_line_neo4j(tx, parsed_tuple, hourly_counts)->None:
     (wiki_code, article_title, page_id, _, _) = parsed_tuple
     if c["debug"]:
         print("INSERTING")
-    for (hour, count) in hourly_counts:
+    for (timestamp, count) in hourly_counts:
         tx.run("CREATE (a: PageView )"
                "SET a.wiki_code=$wiki_code "
                "SET a.article_title=$article_title "
                "SET a.page_id=$page_id "
-               "SET a.timestamp=$hour "
-               "SET a.count=$count ", wiki_code=wiki_code, article_title=article_title, page_id=page_id, hour=hour, count=count)
+               "SET a.timestamp=$timestamp "
+               "SET a.count=$count ", wiki_code=wiki_code, article_title=article_title, page_id=page_id, timestamp=timestamp, count=count)
 
 def generate_ssv_for_line(parsed_tuple, hourly_counts):
     """
@@ -29,16 +32,18 @@ def generate_ssv_for_line(parsed_tuple, hourly_counts):
     """
     (wiki_code, article_title, page_id, _, _) = parsed_tuple
     data = []
-    for (hour, count) in hourly_counts:
-        data.append(" ".join([wiki_code, article_title, page_id, str(hour), str(count)]))
+    for (timestamp, count) in hourly_counts:
+        data.append(" ".join([wiki_code, article_title, page_id, timestamp, str(count)]))
     return data
 
 
-def parse_hourly_counts(tuple):
+def parse_hourly_counts(tuple, filename):
     """
     Convert hourly counts into list of tuples
     :param tuple: parsed tuple with length 5
-    :returns: [(hour,count)] the hour and the number of hits for that hour in a tuple
+    :param filename: Filename that contains the dateinfo, needed for
+    transforming an hour to timestamp
+    :returns: [(timestamp,count)] the timestamp(iso-format) and the number of hits for that hour in a tuple
     """
     (_, _, _, _, hourly_counts) = tuple
     alphabet = list(ascii_uppercase)
@@ -57,11 +62,24 @@ def parse_hourly_counts(tuple):
         else:
             assert num != ""
             assert char.isalpha()
-            list_of_tuples.append((cur_hour, num))
+            list_of_tuples.append((get_timestamp(cur_hour,filename), num))
             cur_hour = alphabet.index(char)
             num = ""
-    list_of_tuples.append((cur_hour, num))
+    list_of_tuples.append((get_timestamp(cur_hour, filename), num))
     return list_of_tuples
+
+def get_timestamp(hour, filename)->str:
+    """
+    Get the timestamp in iso8601 format(YYYY-MM-DDTHH:MM:SS) using the hour and
+    name of the file
+    :param hour: Hour of the day [0..23]
+    :param filename: Contains the date, assumes the file format matches "pageview_YYYYMMDD"
+    :return: timestamp
+    """
+    date = filename.split("_")[1]
+    d = datetime(year=int(date[0:4]), month=int(date[4:6]), day=int(date[6:8]), hour=hour)
+    return d.isoformat()
+
 
 
 def parse_line(line):
@@ -95,7 +113,7 @@ def do_job(filename):
         for line in f:
             parsed = parse_line(line)
             if parsed:
-                hourly_counts = parse_hourly_counts(parsed)
+                hourly_counts = parse_hourly_counts(parsed, filename)
                 if c["dry_run"]:
                     ssv = generate_ssv_for_line(parsed,hourly_counts)
                     [print(el) for el in ssv]
@@ -103,7 +121,7 @@ def do_job(filename):
                     with driver.session() as s:
                         s.write_transaction(insert_line_neo4j, parsed, hourly_counts)
             elif c["debug"]:
-                print("DID NOT PARSE:", line)
+                print("DID NOT PARSE MOST LIKELY BECAUSE OF CONFIG:", line)
 
 
 
