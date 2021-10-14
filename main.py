@@ -23,7 +23,7 @@ def insert_line_neo4j(tx, parsed_tuple, hourly_counts)->None:
                "SET a.wiki_code=$wiki_code "
                "SET a.article_title=$article_title "
                "SET a.page_id=$page_id "
-               "SET a.timestamp=$timestamp "
+               "SET a.timestamp=datetime($timestamp) "
                "SET a.count=$count ", wiki_code=wiki_code, article_title=article_title, page_id=page_id, timestamp=timestamp, count=count)
 
 def generate_ssv_for_line(parsed_tuple, hourly_counts):
