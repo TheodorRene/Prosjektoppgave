@@ -26,6 +26,27 @@ def insert_line_neo4j(tx, parsed_tuple, hourly_counts)->None:
                "SET a.timestamp=datetime($timestamp) "
                "SET a.count=$count ", wiki_code=wiki_code, article_title=article_title, page_id=page_id, timestamp=timestamp, count=count)
 
+
+"""
+This is like adding an empty list to an object. We need something to append to when using append_pageview
+"""
+add_inital_dummy_head = "MATCH (p:Page{id:$page_id)"
+                        "WHERE NOT p -> [:FIRST] -> ()" # Make sure there isnt already a head
+                        "CREATE p -[r:FIRST] -> (head:PAGE_VIEW_LIST)"
+
+
+append_pageview = ""
+        "MATCH (p:Page{id:$page_id}) -[:FIRST] -> (head:PAGE_VIEW_LIST)"
+        "MATCH (head) -[:NEXT*0..]-> (end)" # 1.
+        "WHERE NOT (end) -[:NEXT]-> () "    # 2. Use this get the last entry in the list
+        "CREATE (a:PageView)"
+        "SET a.wiki_code=$wiki_code"
+        "SET a.article_title=$article_title"
+        "SET a.page_id=$page_id"
+        "SET a.timestamp=datetime($timestamp)"
+        "SET a.count=$count"
+        "CREATE end -[:NEXT]-> a"           # Create relation
+
 def generate_ssv_for_line(parsed_tuple, hourly_counts):
     """
     Converts our originally parsed tuple into a list of strings with space separated values using hourly_counts
