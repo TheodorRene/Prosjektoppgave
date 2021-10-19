@@ -1,4 +1,5 @@
 import os
+import mysql.connector
 
 def get_all_link_titles():
     #TODO: Remove config as it is set in #6
