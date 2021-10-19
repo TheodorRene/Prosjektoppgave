@@ -6,8 +6,8 @@ import random
 import math
 
 class Page:
-    def __init__(self, title, newest_revision_links):
-        self.title = title
+    def __init__(self, page_id, newest_revision_links):
+        self.page_id = page_id
         self.revisions = self._initialize_revisions(newest_revision_links)
         self.monthly_update_rate = self._emulate_monthly_update_rate()
 
@@ -45,7 +45,7 @@ class Page:
         return timestamps
 
     def to_csv_format(self):
-        return [[self.title, key, value] for (key, value) in self.revisions.items()]
+        return [[self.page_id, timestamp, links] for (timestamp, links) in self.revisions.items()]
 
     @staticmethod
     def simulate_link_updates(newest_link_titles):

@@ -18,8 +18,8 @@ def main():
 
 def generate_pages():
     """Generates an iterable of Page objects"""
-    erna = Page("Erna_Solberg", ["Kaffe", "Norge", "Parlamentet", "Sverige", "Alfabetet"])
-    kaffe = Page("Kaffe", ["Norge", "Alfabetet", "Bønner"])
+    erna = Page(1, ["Kaffe", "Norge", "Parlamentet", "Sverige", "Alfabetet"])
+    kaffe = Page(2, ["Norge", "Alfabetet", "Bønner"])
     return [erna, kaffe]
 
 
