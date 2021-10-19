@@ -1,4 +1,5 @@
 from utils.constants import MONTHS, START, END
+from utils.db import get_all_link_titles
 from utils.random_date import random_date
 
 
@@ -70,13 +71,15 @@ class Page:
     def simulate_link_gain(link_titles):
         """
         Simulate link gain based on a probability of gaining a random link
-        TODO: Define whith link_titles can be linked. 
+        TODO: Define which link_titles can be linked. 
         """
-        ALL_LINK_TITLES = ["Sau", "Geit", "Danmark", "Finland", "Finnmark", "Viken", "Belgia", "Paris", "Madrid", "Støre"]
+        all_link_titles = get_all_link_titles()
+        for link in all_link_titles:
+            print(link)
         LINK_GAIN_PROBABILITY = 0.1
         gained_link_count = math.ceil(LINK_GAIN_PROBABILITY * len(link_titles))
         for _ in range(gained_link_count):
-            random_title = random.choice(ALL_LINK_TITLES)
+            random_title = random.choice(all_link_titles)
             if not random_title in link_titles:
                 link_titles.append(random_title)
         return link_titles
