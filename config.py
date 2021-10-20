@@ -15,5 +15,6 @@ pagelinks_config = {
     "user":"root",
     "password":"my-secret-pw",
     "database":"pagelinks-db",
-    "dry_run":True
+    "dry_run":False,
+    "use_pagelinks_complete":True
 }
