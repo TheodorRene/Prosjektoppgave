@@ -8,9 +8,10 @@ from neo4j import GraphDatabase
 from config import config as c
 
 
+#IMPURE
 def insert_line_neo4j(tx, parsed_tuple, hourly_counts)->None:
     """
-    Actually insert the data
+    Actually insert the pageview data
     :param parsed_tuple: A parsed tuple
     :param hourly_counts: [(hour,count)] List of tuples with hourly pageviews
     :return: None, only sideffects
@@ -51,7 +52,7 @@ append_pageview = "" + \
         "SET a.count=$count"
         "CREATE end -[:NEXT]-> a")           # Create relation
 
-# O(1)
+# O(1) inserts
 append_pageview_better = "" + \
         ("MATCH (p:Page{id:$page_id}) -[r:LAST] -> (l:PageView)" # Match to get tail of linked list
         "CREATE (a:PageView)"                                         # Create Pageview
@@ -64,6 +65,7 @@ append_pageview_better = "" + \
         "DELETE r"                                                   # Delete tail relation to old tail
         "CREATE p -[:last]-> a")                                    # Create tail realation to new tail
 
+#PURE
 def generate_ssv_for_line(parsed_tuple, hourly_counts):
     """
     Converts our originally parsed tuple into a list of strings with space separated values using hourly_counts
@@ -75,6 +77,7 @@ def generate_ssv_for_line(parsed_tuple, hourly_counts):
     return data
 
 
+#PURE
 def parse_hourly_counts(tuple, filename):
     """
     Convert hourly counts into list of tuples
@@ -108,6 +111,7 @@ def parse_hourly_counts(tuple, filename):
     return list_of_tuples
 
 
+#PURE
 def get_minute_views(hour, filename, num):
     """
     Randomly break down the hourly page views to minutes.
@@ -125,6 +129,7 @@ def get_minute_views(hour, filename, num):
     return tuples
 
 
+#PURE
 def get_timestamp(hour, minute, filename)->str:
     """
     Get the timestamp in iso8601 format(YYYY-MM-DDTHH:MM:SS) using the hour and
@@ -139,6 +144,7 @@ def get_timestamp(hour, minute, filename)->str:
 
 
 
+#PURE
 def parse_line(line):
     """
     Parse a line from the file.
@@ -162,6 +168,7 @@ def parse_line(line):
         return
 
 
+#IMPURE
 def do_job(filename):
     with open(filename, "r") as f:
         if not c["dry_run"]:
@@ -186,6 +193,6 @@ if __name__ == "__main__":
     filename = argv[1]
     do_job(filename)
 """
-if __name__ == "__main__": 
+if __name__ == "__main__":
     tuple = ("", "", "", "", "A1B2C3D4E62F26G125H612I16J74K2457L885M24N24O8P45Q245R1S2T4U5V6W7")
     print(parse_hourly_counts(tuple, "_20000101"))
