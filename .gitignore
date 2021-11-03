@@ -1,2 +1,4 @@
 venv
 dump/page*
+env.sh
+__pycache__
