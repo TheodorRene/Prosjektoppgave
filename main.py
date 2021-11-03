@@ -104,6 +104,7 @@ def parse_hourly_counts(tuple, filename):
             cur_hour = alphabet.index(char)
             num = ""
     list_of_tuples.extend(get_minute_views(cur_hour, filename, int(num)))
+    print(list_of_tuples)
     return list_of_tuples
 
 
@@ -180,7 +181,11 @@ def do_job(filename):
                 print("DID NOT PARSE MOST LIKELY BECAUSE OF CONFIG:", line)
 
 
-
+"""
 if __name__ == "__main__":
     filename = argv[1]
     do_job(filename)
+"""
+if __name__ == "__main__": 
+    tuple = ("", "", "", "", "A1B2C3D4E62F26G125H612I16J74K2457L885M24N24O8P45Q245R1S2T4U5V6W7")
+    print(parse_hourly_counts(tuple, "_20000101"))
