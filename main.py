@@ -30,15 +30,16 @@ def insert_line_neo4j(tx, parsed_tuple, hourly_counts)->None:
 """
 This is like adding an empty list to an object. We need something to append to when using append_pageview{_better}
 """
-add_inital_dummy_head = "MATCH (p:Page{id:$page_id)"
-                        "WHERE NOT p -> [:FIRST] -> () OR NOT p -> [:LAST] -> ()" # Make sure there isnt already a head or tail
+add_inital_dummy_head = "" + \
+                        ("MATCH (p:Page{id:$page_id)"
+                        "WHERE NOT p -> [:FIRST] -> () OR NOT p -> [:LAST] -> ()"  # Make sure there isnt already a head or tail
                         "CREATE p -[r:FIRST] -> (head:PageView{dummy:True}),"
-                        "CREATE p -[r:LAST] -> (head)"
+                        "CREATE p -[r:LAST] -> (head)")
 
 
 # O(n) where n is amount of pageviews
-append_pageview = ""
-        "MATCH (p:Page{id:$page_id}) -[:FIRST] -> (head:PageView)"
+append_pageview = "" + \
+        ("MATCH (p:Page{id:$page_id}) -[:FIRST] -> (head:PageView)"
         "MATCH (head) -[:NEXT*0..]-> (end)" # 1.
         "WHERE NOT (end) -[:NEXT]-> () "    # 2. Use this get the last entry in the list
         "CREATE (a:PageView)"
@@ -47,11 +48,11 @@ append_pageview = ""
         "SET a.page_id=$page_id"
         "SET a.timestamp=datetime($timestamp)"
         "SET a.count=$count"
-        "CREATE end -[:NEXT]-> a"           # Create relation
+        "CREATE end -[:NEXT]-> a")           # Create relation
 
 # O(1)
-append_pageview_better = ""
-        "MATCH (p:Page{id:$page_id}) -[r:LAST] -> (l:PageView)" # Match to get tail of linked list
+append_pageview_better = "" + \
+        ("MATCH (p:Page{id:$page_id}) -[r:LAST] -> (l:PageView)" # Match to get tail of linked list
         "CREATE (a:PageView)"                                         # Create Pageview
         "SET a.wiki_code=$wiki_code"
         "SET a.article_title=$article_title"
@@ -60,7 +61,7 @@ append_pageview_better = ""
         "SET a.count=$count"
         "CREATE l -[:NEXT]-> a"                                      # Creat link between last tail and new tail
         "DELETE r"                                                   # Delete tail relation to old tail
-        "CREATE p -[:last]-> a"                                      # Create tail realation to new tail
+        "CREATE p -[:last]-> a")                                    # Create tail realation to new tail
 
 def generate_ssv_for_line(parsed_tuple, hourly_counts):
     """
