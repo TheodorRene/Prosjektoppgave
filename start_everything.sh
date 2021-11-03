@@ -22,11 +22,11 @@ month=${arg1:4:2}
 day=${arg1:6:2}
 
 echo -n "Downloading dumps" && date
-([ -f page_${arg1}.sql ] || (curl -s https://dumps.wikimedia.org/nowiki/${arg1}/nowiki-${arg1}-page.sql.gz -o page_${arg1}.sql.gz && gzip -d page_${arg1}.sql.gz)) &
+([ -f dump/page_${arg1}.sql ] || (curl -s https://dumps.wikimedia.org/nowiki/${arg1}/nowiki-${arg1}-page.sql.gz -o dump/page_${arg1}.sql.gz && gzip -d dump/page_${arg1}.sql.gz)) &
 P1=$!
-([ -f pagelinks_${arg1}.sql ] || (curl -s https://dumps.wikimedia.org/nowiki/${arg1}/nowiki-${arg1}-pagelinks.sql.gz -o pagelinks_${arg1}.sql.gz && gzip -d pagelinks_${arg1}.sql.gz)) &
+([ -f dump/pagelinks_${arg1}.sql ] || (curl -s https://dumps.wikimedia.org/nowiki/${arg1}/nowiki-${arg1}-pagelinks.sql.gz -o dump/pagelinks_${arg1}.sql.gz && gzip -d dump/pagelinks_${arg1}.sql.gz)) &
 P2=$!
-([ -f pageview_${arg1} ] || (curl -s https://dumps.wikimedia.org/other/pageview_complete/${year}/${year}-${month}/pageviews-${arg1}-user.bz2 -o pageview_${arg1}.bz2 && bzip2 -d pageview_${arg1}.bz2)) &
+([ -f dump/pageview_${arg1} ] || (curl -s https://dumps.wikimedia.org/other/pageview_complete/${year}/${year}-${month}/pageviews-${arg1}-user.bz2 -o dump/pageview_${arg1}.bz2 && bzip2 -d dump/pageview_${arg1}.bz2)) &
 P3=$!
 
 
@@ -54,7 +54,10 @@ docker run -d \
     -v $HOME/neo4j/import:/var/lib/neo4j/import \
     -v $HOME/neo4j/plugins:/plugins \
     --name $neo \
-     -e NEO4J_AUTH=neo4j/$NEO4J_PASS \
+    -e NEO4J_AUTH=neo4j/$NEO4J_PASS \
+    -e NEO4JLABS_PLUGINS='["apoc", "graph-data-science"]' \
+    -e NEO4J_dbms_security_procedures_unrestricted='apoc.*,gds.*' \
+    -e dbms.security.procedures.allowlist='apoc.*,gds.*' \
     neo4j:4.3.6 &
 P5=$!
 
@@ -66,10 +69,10 @@ echo "Sleeping to make sure the docker containers are ready"
 sleep 4
 
 echo "Inserting data"
-docker exec -i $mdb sh -c 'exec mysql -uroot -p"$MARIADB_ROOT_PASSWORD" pagelinks-db' < page_${arg1}.sql &
+docker exec -i $mdb sh -c 'exec mysql -uroot -p"$MARIADB_ROOT_PASSWORD" pagelinks-db' < dump/page_${arg1}.sql &
 P6=$!
 echo "Inserting more data"
-docker exec -i $mdb sh -c 'exec mysql -uroot -p"$MARIADB_ROOT_PASSWORD" pagelinks-db' < pagelinks_${arg1}.sql &
+docker exec -i $mdb sh -c 'exec mysql -uroot -p"$MARIADB_ROOT_PASSWORD" pagelinks-db' < dump/pagelinks_${arg1}.sql &
 P7=$!
 wait $P6 $P7
 echo -n "Done with inserting page and pagelinks " && date
@@ -97,7 +100,7 @@ echo $query > make_pagelinks.sql
 echo -n "inserting data " && date
 docker exec -i $mdb sh -c 'exec mysql -uroot -p"$MARIADB_ROOT_PASSWORD" pagelinks-db' < make_pagelinks.sql
 echo -n "Done with pagelinks_complete " && date
-source ../venv/bin/activate && python ../pagelinks.py
+source venv/bin/activate && python pagelinks.py
 
 echo -n "Finito " && date
 
