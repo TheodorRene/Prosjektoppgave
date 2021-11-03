@@ -9,4 +9,4 @@ arg2=$2
 str='match (n:Page{title:"'
 str2='"}), (q:Page{title:"'
 str3='"}), p = shortestPath((n) -[*]-> (q)) return p;'
-echo "$str$arg1$str2$arg2$str3" | cypher-shell -u neo4j -p QM6yBEkttU7VWx
+echo "$str$arg1$str2$arg2$str3" | cypher-shell -u neo4j -p $NEO_PASS
