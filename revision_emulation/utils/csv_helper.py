@@ -2,10 +2,10 @@ import csv
 class CsvHelper:
 
     @staticmethod
-    def save_to_csv(rows):
+    def save_to_csv(rows, filename):
         """Converts a list of elements into a CSV file"""
 
-        with open('revisions.csv', 'w', encoding='UTF8', newline='') as file:
+        with open(filename, 'w', encoding='UTF8', newline='') as file:
             writer = csv.writer(file)
 
             writer.writerows(rows)

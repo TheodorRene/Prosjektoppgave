@@ -1,5 +1,5 @@
-from utils.constants import MONTHS, START, END
-from utils.db import get_all_link_titles
+from utils.constants import START, END
+from utils.link_ids import LINK_IDS
 from utils.random_date import random_date
 
 
@@ -10,18 +10,18 @@ class Page:
     def __init__(self, page_id, newest_revision_links):
         self.page_id = page_id
         self.revisions = self._initialize_revisions(newest_revision_links)
-        self.monthly_update_rate = self._emulate_monthly_update_rate()
+        self.number_of_updates = self._emulate_number_of_updates()
 
     def _initialize_revisions(self, newest_revision_links):
         revisions = { END: newest_revision_links }
         return revisions 
     
-    def _emulate_monthly_update_rate(self):
+    def _emulate_number_of_updates(self):
         """
         Set a monthly update rate for the page.
         TODO: Create a module for distributing update rates from real Wikipedia articles 
         """
-        return 10
+        return random.randint(5,15)
 
     def generate_revisions(self):
         """
@@ -40,7 +40,7 @@ class Page:
     def generate_timestamps(self):
         """Generate a sorted list with timestamps, including the END timestamp"""
         timestamps = [END]
-        for _ in range(self.monthly_update_rate * MONTHS):
+        for _ in range(self.number_of_updates):
             timestamps.append(random_date(START, END))
         timestamps.sort(reverse=True)
         return timestamps
@@ -73,9 +73,7 @@ class Page:
         Simulate link gain based on a probability of gaining a random link
         TODO: Define which link_titles can be linked. 
         """
-        all_link_titles = get_all_link_titles()
-        for link in all_link_titles:
-            print(link)
+        all_link_titles = LINK_IDS
         LINK_GAIN_PROBABILITY = 0.1
         gained_link_count = math.ceil(LINK_GAIN_PROBABILITY * len(link_titles))
         for _ in range(gained_link_count):
