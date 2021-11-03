@@ -1,4 +1,5 @@
 from datetime import datetime
+import random
 from string import ascii_uppercase
 from sys import argv
 
@@ -99,13 +100,31 @@ def parse_hourly_counts(tuple, filename):
         else:
             assert num != ""
             assert char.isalpha()
-            list_of_tuples.append((get_timestamp(cur_hour,filename), num))
+            list_of_tuples.extend(get_minute_views(cur_hour, filename, int(num)))
             cur_hour = alphabet.index(char)
             num = ""
-    list_of_tuples.append((get_timestamp(cur_hour, filename), num))
+    list_of_tuples.extend(get_minute_views(cur_hour, filename, int(num)))
     return list_of_tuples
 
-def get_timestamp(hour, filename)->str:
+
+def get_minute_views(hour, filename, num):
+    """
+    Randomly break down the hourly page views to minutes.
+    :param hour: Hour of the day [0..23]
+    :param filename: Contains the date, assumes the file format matches "pageview_YYYYMMDD"
+    :return: [(timestamp, count)] the timestamp(iso-format) and the number of hits for that minute in a tuple
+    """
+    tuples = []
+    minutes = [0 for i in range(60)]
+    for _ in range(num):
+        minutes[random.randint(0, 59)] += 1
+    for minute, minute_count in enumerate(minutes):
+        if minute_count:
+            tuples.append((get_timestamp(hour, minute, filename), minute_count))
+    return tuples
+
+
+def get_timestamp(hour, minute, filename)->str:
     """
     Get the timestamp in iso8601 format(YYYY-MM-DDTHH:MM:SS) using the hour and
     name of the file
@@ -114,7 +133,7 @@ def get_timestamp(hour, filename)->str:
     :return: timestamp
     """
     date = filename.split("_")[1]
-    d = datetime(year=int(date[0:4]), month=int(date[4:6]), day=int(date[6:8]), hour=hour)
+    d = datetime(year=int(date[0:4]), month=int(date[4:6]), day=int(date[6:8]), hour=hour, minute=minute)
     return d.isoformat()
 
 
