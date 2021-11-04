@@ -51,10 +51,6 @@ This is like adding an empty list to an object. We need something to append to w
 # │        │              └─────────────────────┘
 # └───┬────┘                   ▲
 #     │                        │
-#     │                        │
-#     │                        │
-#     │                        │
-#     │                        │
 #     └─────────:LAST──────────┘
 add_inital_dummy_head_q = "" + \
                         ("MATCH (p:Page{id:$page_id)"
@@ -67,9 +63,7 @@ add_inital_dummy_head_q = "" + \
 # │Page ├───:FIRST────► PageView{dummy:True}│
 # └──┬──┘             └──────────┬──────────┘
 #    │                           │
-#    │                           │
 #    │                          :NEXT
-#    │                           │
 #    │                           │
 #    │                ┌──────────▼─────────────┐
 #    └─:LAST──────────►PageView{wiki_code: ...}│
