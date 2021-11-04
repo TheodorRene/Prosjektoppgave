@@ -7,6 +7,9 @@ from neo4j import GraphDatabase
 
 from config import config as c
 
+def log(text):
+    print(datetime.now(), text)
+
 
 #IMPURE
 def insert_line_neo4j(tx, parsed_tuple, hourly_counts)->None:
@@ -21,37 +24,56 @@ def insert_line_neo4j(tx, parsed_tuple, hourly_counts)->None:
     if c["debug"]:
         print("INSERTING")
     for (timestamp, count) in hourly_counts:
-        tx.run("CREATE (a: PageView )"
-               "SET a.wiki_code=$wiki_code "
-               "SET a.article_title=$article_title "
-               "SET a.page_id=$page_id "
-               "SET a.timestamp=datetime($timestamp) "
-               "SET a.count=$count ", wiki_code=wiki_code, article_title=article_title, page_id=page_id, timestamp=timestamp, count=count)
+        # TODO use dict
+        tx.run(append_pageview_better_q, wiki_code=wiki_code, article_title=article_title, page_id=page_id, timestamp=timestamp, count=count)
+
+#IMPURE
+def add_inital_dummy_head(tx, page_id):
+    tx.run(add_inital_dummy_head_q, page_id=page_id)
+
+#IMPURE
+def delete_all_pageviews(tx):
+    """
+    Delete all pageviews
+    """
+    tx.run(reset_state_q)
+
+
+reset_state_q= "" + \
+              ("MATCH (pv:PageView) DETACH DELETE pv")
 
 
 """
 This is like adding an empty list to an object. We need something to append to when using append_pageview{_better}
 """
-add_inital_dummy_head = "" + \
+# ┌────────┐              ┌─────────────────────┐
+# │  Page  ├──:FIRST───►  │Pageview{dummy:True} │
+# │        │              └─────────────────────┘
+# └───┬────┘                   ▲
+#     │                        │
+#     │                        │
+#     │                        │
+#     │                        │
+#     │                        │
+#     └─────────:LAST──────────┘
+add_inital_dummy_head_q = "" + \
                         ("MATCH (p:Page{id:$page_id)"
                         "WHERE NOT p -> [:FIRST] -> () OR NOT p -> [:LAST] -> ()"  # Make sure there isnt already a head or tail
                         "CREATE p -[r:FIRST] -> (head:PageView{dummy:True}),"
                         "CREATE p -[r:LAST] -> (head)")
 
 
-# O(n) where n is amount of pageviews
-append_pageview = "" + \
-        ("MATCH (p:Page{id:$page_id}) -[:FIRST] -> (head:PageView)"
-        "MATCH (head) -[:NEXT*0..]-> (end)" # 1.
-        "WHERE NOT (end) -[:NEXT]-> () "    # 2. Use this get the last entry in the list
-        "CREATE (a:PageView)"
-        "SET a.wiki_code=$wiki_code"
-        "SET a.article_title=$article_title"
-        "SET a.page_id=$page_id"
-        "SET a.timestamp=datetime($timestamp)"
-        "SET a.count=$count"
-        "CREATE end -[:NEXT]-> a")           # Create relation
-
+# ┌─────┐             ┌─────────────────────┐
+# │Page ├───:FIRST────► PageView{dummy:True}│
+# └──┬──┘             └──────────┬──────────┘
+#    │                           │
+#    │                           │
+#    │                          :NEXT
+#    │                           │
+#    │                           │
+#    │                ┌──────────▼─────────────┐
+#    └─:LAST──────────►PageView{wiki_code: ...}│
+#                     └────────────────────────┘
 # O(1) inserts
 append_pageview_better = "" + \
         ("MATCH (p:Page{id:$page_id}) -[r:LAST] -> (l:PageView)" # Match to get tail of linked list
@@ -107,7 +129,6 @@ def parse_hourly_counts(tuple, filename):
             cur_hour = alphabet.index(char)
             num = ""
     list_of_tuples.extend(get_minute_views(cur_hour, filename, int(num)))
-    print(list_of_tuples)
     return list_of_tuples
 
 
@@ -169,11 +190,15 @@ def parse_line(line):
 
 
 #IMPURE
-def do_job(filename):
-    with open(filename, "r") as f:
+def do_job(filepath):
+    with open(filepath, "r") as f:
         if not c["dry_run"]:
+            log("Connecting to Neo4j db")
             driver = GraphDatabase.driver(c["uri"], auth=(c["user"], c["password"]))
 
+        #should in theory both work for "dump/pageview_XXXXX" and "pageview_xxxx"
+        filename=filepath.split("/")[-1]
+        log("Iterating through lines")
         for line in f:
             parsed = parse_line(line)
             if parsed:
@@ -188,11 +213,13 @@ def do_job(filename):
                 print("DID NOT PARSE MOST LIKELY BECAUSE OF CONFIG:", line)
 
 
-"""
 if __name__ == "__main__":
-    filename = argv[1]
-    do_job(filename)
+    filepath = argv[1]
+    log("Starting script")
+    do_job(filepath)
+    log("finito")
 """
 if __name__ == "__main__":
     tuple = ("", "", "", "", "A1B2C3D4E62F26G125H612I16J74K2457L885M24N24O8P45Q245R1S2T4U5V6W7")
-    print(parse_hourly_counts(tuple, "_20000101"))
+    [print(el) for el in parse_hourly_counts(tuple, "_20000101")]
+"""
