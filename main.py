@@ -21,15 +21,14 @@ def insert_line_neo4j(tx, parsed_tuple, hourly_counts)->None:
     """
     assert len(parsed_tuple) == 5
     (wiki_code, article_title, page_id, _, _) = parsed_tuple
-    if c["debug"]:
-        print("INSERTING")
+    add_inital_dummy_head(tx, page_id)
     for (timestamp, count) in hourly_counts:
         # TODO use dict
-        tx.run(append_pageview_better_q, wiki_code=wiki_code, article_title=article_title, page_id=page_id, timestamp=timestamp, count=count)
+        result=tx.run(append_pageview_better_q, wiki_code=wiki_code, article_title=article_title, page_id=page_id, timestamp=timestamp, count=count)
 
 #IMPURE
 def add_inital_dummy_head(tx, page_id):
-    tx.run(add_inital_dummy_head_q, page_id=page_id)
+    result = tx.run(add_inital_dummy_head_q, page_id=page_id)
 
 #IMPURE
 def delete_all_pageviews(tx):
@@ -40,7 +39,7 @@ def delete_all_pageviews(tx):
 
 
 reset_state_q= "" + \
-              ("MATCH (pv:PageView) DETACH DELETE pv")
+              ("MATCH (pv:PageView) DETACH DELETE pv ")
 
 
 """
@@ -53,10 +52,10 @@ This is like adding an empty list to an object. We need something to append to w
 #     │                        │
 #     └─────────:LAST──────────┘
 add_inital_dummy_head_q = "" + \
-                        ("MATCH (p:Page{id:$page_id)"
-                        "WHERE NOT p -> [:FIRST] -> () OR NOT p -> [:LAST] -> ()"  # Make sure there isnt already a head or tail
-                        "CREATE p -[r:FIRST] -> (head:PageView{dummy:True}),"
-                        "CREATE p -[r:LAST] -> (head)")
+                        ("MATCH (p:Page{id:$page_id}) "
+                        "WHERE NOT (p) -[:FIRST]-> () AND NOT (p) -[:LAST]-> () "  # Make sure there isnt already a head or tail
+                        "CREATE (p) -[:FIRST] -> (head:PageView{dummy:True}), "
+                        "(p) -[:LAST] -> (head) ")
 
 
 # ┌─────┐             ┌─────────────────────┐
@@ -69,17 +68,17 @@ add_inital_dummy_head_q = "" + \
 #    └─:LAST──────────►PageView{wiki_code: ...}│
 #                     └────────────────────────┘
 # O(1) inserts
-append_pageview_better = "" + \
-        ("MATCH (p:Page{id:$page_id}) -[r:LAST] -> (l:PageView)" # Match to get tail of linked list
-        "CREATE (a:PageView)"                                         # Create Pageview
-        "SET a.wiki_code=$wiki_code"
-        "SET a.article_title=$article_title"
-        "SET a.page_id=$page_id"
-        "SET a.timestamp=datetime($timestamp)"
-        "SET a.count=$count"
-        "CREATE l -[:NEXT]-> a"                                      # Creat link between last tail and new tail
-        "DELETE r"                                                   # Delete tail relation to old tail
-        "CREATE p -[:last]-> a")                                    # Create tail realation to new tail
+append_pageview_better_q = "" + \
+        ("MATCH (p:Page{id:$page_id}) -[r:LAST] -> (l:PageView) " # Match to get tail of linked list
+        "CREATE (a:PageView) "                                         # Create Pageview
+        "SET a.wiki_code=$wiki_code "
+        "SET a.article_title=$article_title "
+        "SET a.page_id=$page_id "
+        "SET a.timestamp=datetime($timestamp) "
+        "SET a.count=$count "
+        "CREATE (l) -[:NEXT]-> (a), "                                    # Creat link between last tail and new tail
+        "(p) -[:LAST]-> (a) "                                            # Create tail relation to new tail
+        "DELETE (r) ")                                                   # Delete tail relation to old tail
 
 #PURE
 def generate_ssv_for_line(parsed_tuple, hourly_counts):

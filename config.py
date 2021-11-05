@@ -4,7 +4,7 @@ config = {
         "uri":"bolt://localhost:7687",
         "user": "neo4j",
         "password":os.environ["NEO4J_PASS"],
-        "dry_run":True,
+        "dry_run":False,
         "only_norway":True,
         "only_pages":True,
         "only_include_desktop":True
