@@ -176,7 +176,7 @@ def parse_line(line):
             predicates.append(not article_title.startswith("Fil:"))
         if c["only_include_desktop"]:
             predicates.append( user_agent=="desktop" )
-        return (wiki_code, article_title, page_id, daily_total, hourly_counts) if all(predicates) else None
+        return (wiki_code, article_title, int(page_id), daily_total, hourly_counts) if all(predicates) else None
     except:
         print("Could not parse this line", line)
         return
