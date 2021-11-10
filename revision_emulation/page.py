@@ -1,7 +1,7 @@
 from utils.constants import START, END
 from utils.link_ids import LINK_IDS
 from utils.random_date import random_date
-
+from utils.config import revisions_config
 
 import random
 import math
@@ -21,7 +21,7 @@ class Page:
         Set a monthly update rate for the page.
         TODO: Create a module for distributing update rates from real Wikipedia articles 
         """
-        return random.randint(5,15)
+        return random.randint(revisions_config["revisions_minimum"],revisions_config["revisions_maximum"])
 
     def generate_revisions(self):
         """
@@ -60,8 +60,7 @@ class Page:
         Simulate a link loss based on a probability of losing a link
         TODO: Define a link loss probability distribution based on real data set
         """
-        LINK_LOSS_PROBABILITY = 0.1
-        lost_link_count = math.ceil(LINK_LOSS_PROBABILITY * len(link_titles))
+        lost_link_count = math.ceil(revisions_config["link_loss_probability"] * len(link_titles))
         for _ in range(lost_link_count):
             random_title = random.choice(link_titles)
             link_titles.remove(random_title)
@@ -74,8 +73,7 @@ class Page:
         TODO: Define which link_titles can be linked. 
         """
         all_link_titles = LINK_IDS
-        LINK_GAIN_PROBABILITY = 0.1
-        gained_link_count = math.ceil(LINK_GAIN_PROBABILITY * len(link_titles))
+        gained_link_count = math.ceil(revisions_config["link_gain_probability"] * len(link_titles))
         for _ in range(gained_link_count):
             random_title = random.choice(all_link_titles)
             if not random_title in link_titles:

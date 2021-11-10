@@ -1,4 +1,4 @@
-from csv_helper import CsvHelper
+from utils.csv_helper import CsvHelper
 import ast
 
 class PagelinkValidity:
@@ -10,7 +10,7 @@ class PagelinkValidity:
         self.interval_start = timestamp
 
     def to_representation(self):
-        return f"{self.interval_start}->{self.interval_end}"
+        return f"{self.interval_start},{self.interval_end}"
 
 class PagelinkIntervalMap:
     def __init__(self):
@@ -33,7 +33,7 @@ class PagelinkIntervalMap:
     def _get_purged_records(self, new_timestamp):
         """
         Remove and return all pages which were not in the current revision.
-        Returns a list on the form [ [id, start->end], ... ] 
+        Returns a list on the form [ [id, start, end], ... ] 
         """
         purged_records = []
         pages_to_pop = []
@@ -57,7 +57,7 @@ def _prefix_with_from_page_id(from_page_id, purged_intervals):
         result.append(relation)
     return result
 
-def main():
+def create_revisions_with_time_interval():
     lines = CsvHelper.read_csv("revisions.csv")
     first = True
     previous_id = None
@@ -94,6 +94,3 @@ def main():
     to_csv.extend(_prefix_with_from_page_id(new_id, purged_intervals))
     
     CsvHelper.save_to_csv(to_csv, "compressed_revisions.csv")
-
-if __name__ == "__main__":
-    main()

@@ -1,7 +1,7 @@
 import os
 import mysql.connector
 
-from csv_helper import CsvHelper
+from utils.csv_helper import CsvHelper
 
 c = {
     "host":"localhost",
