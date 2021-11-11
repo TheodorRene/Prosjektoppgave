@@ -1,3 +1,5 @@
-echo "You must set the environment varibables in this file" # delete me
+echo "You must set the environment varibables in this file"  ||
 export NEO4J_PASS=YOUR_PASSWORD_HERE
 export MARIADB_ROOT_PASSWORD=YOUR_PASSWORD_HERE
+export INFLUX_PASS=YOUR_PASSWORD_HERE
+export INFLUX_TOKEN=YOUR_PASSWORD_HERE
