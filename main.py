@@ -88,7 +88,7 @@ def generate_ssv_for_line(parsed_tuple, hourly_counts):
     (wiki_code, article_title, page_id, _, _) = parsed_tuple
     data = []
     for (timestamp, count) in hourly_counts:
-        data.append(" ".join([wiki_code, article_title, page_id, timestamp, str(count)]))
+        data.append(" ".join([wiki_code, article_title, str(page_id), timestamp, str(count)]))
     return data
 
 
@@ -178,7 +178,8 @@ def parse_line(line):
             predicates.append( user_agent=="desktop" )
         return (wiki_code, article_title, int(page_id), daily_total, hourly_counts) if all(predicates) else None
     except:
-        print("Could not parse this line", line)
+        if c["debug"]:
+            print("Could not parse this line", line)
         return
 
 
@@ -191,7 +192,8 @@ def do_job(filepath):
 
         #should in theory both work for "dump/pageview_XXXXX" and "pageview_xxxx"
         filename=filepath.split("/")[-1]
-        log("Iterating through lines")
+        if c["debug"]:
+            log("Iterating through lines")
         for line in f:
             parsed = parse_line(line)
             if parsed:
@@ -208,9 +210,11 @@ def do_job(filepath):
 
 if __name__ == "__main__":
     filepath = argv[1]
-    log("Starting script")
+    if c["debug"]:
+        log("Starting script")
     do_job(filepath)
-    log("finito")
+    if c["debug"]:
+        log("finito")
 """
 if __name__ == "__main__":
     tuple = ("", "", "", "", "A1B2C3D4E62F26G125H612I16J74K2457L885M24N24O8P45Q245R1S2T4U5V6W7")
