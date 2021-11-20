@@ -78,14 +78,44 @@ number_of_hits_for_a_range_page_id = "" + \
        '|> filter(fn: (r) => r["page_id"] == page_id)'
        '|> sum(column: "_value")')
 
+def get_number_of_hits_for_a_range_multiple_page_ids(page_ids):
+    """Get all views for all the provided page ids"""
+    regex = parse_multiple_id_regex(page_ids)
+    return "" + \
+    (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
+       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
+       '|> filter(fn: (r) => r["_field"] == "hits")'
+       f'|> filter(fn: (r) => r["page_id"] =~ {regex})'
+       '|> sum(column: "_value")')
+
+def get_average_number_of_hits_for_a_range_multiple_page_ids(page_ids):
+    """Calculate the average views for the provided page ids"""
+    regex = parse_multiple_id_regex(page_ids)
+    return "" + \
+    (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
+       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
+       '|> filter(fn: (r) => r["_field"] == "hits")'
+       f'|> filter(fn: (r) => r["page_id"] =~ {regex})'
+       '|> sum(column: "_value")'
+       '|> group(columns: ["_measurement"], mode:"by")'
+       '|> mean(column: "_value")')
+
+def parse_multiple_id_regex(ids):
+    """Parses ids to the form "/^(x|y|z)$/"""
+    string_ids = [str(id) for id in ids]
+    pipe_separated_ids = "|".join(string_ids)
+    return f"/^({pipe_separated_ids})$/"
+
 def do_query(query_api, query, params):
     debuglog("doing query " +  query)
     result = query_api.query(org=org,  query=query, params=params)
 
     results = []
     for table in result:
-            for record in table.records:
-                        results.append((record.get_field(), record.get_value()))
+        for record in table.records:
+            results.append((record.get_value()))
     return results
 
 day_start=datetime(year=2021, month=9, day=1, hour=0, minute=1)
@@ -105,10 +135,11 @@ if __name__=="__main__":
     query_api = getQueryApi(client)
     if c["query"]:
         print(do_query(query_api, number_of_hits_for_a_range_page_id, get_payload("1000275")))
+        page_ids = [5, 6]
+        print(do_query(query_api, get_number_of_hits_for_a_range_multiple_page_ids(page_ids), get_payload("_")))
+        print(do_query(query_api, get_average_number_of_hits_for_a_range_multiple_page_ids(page_ids), get_payload("_")))
     else:
         filepath = argv[1]
         do_job(write_api, filepath)
-    write_api.close()
-
-
+    write_api.close()   
 
