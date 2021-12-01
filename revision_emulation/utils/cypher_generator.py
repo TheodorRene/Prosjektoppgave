@@ -9,7 +9,7 @@ class CypherQueryGenerator:
                 ("MATCH "
                 f"(a:{node_type}),"
                 f"(b:{node_type}) "
-                f"WHERE a.{id_field} = '{from_node}' AND b.{id_field} = '{to_node}' "
+                f"WHERE a.{id_field} = {from_node} AND b.{id_field} = {to_node} "
                 f"CREATE (a)-[:{relation_name} {properties if properties else ''}]->(b);")
 
 class RevisionCypherQueryGenerator(CypherQueryGenerator):
@@ -29,5 +29,10 @@ class RevisionCypherQueryGenerator(CypherQueryGenerator):
         from_timestamp.replace('"', '')
         to_timestamp.replace('"', '')
 
-        insert_statement = CypherQueryGenerator.insert_relation(from_node=from_id, to_node=to_id, node_type="Page", id_field="id", properties=f"{{from_timestamp: '{from_timestamp}', to_timestamp: '{to_timestamp}'}}", relation_name="LINKS_TO")
+        if to_timestamp == "None":
+            to_timestamp_insertion = "null"
+        else:
+            to_timestamp_insertion = f"'{to_timestamp}'"
+        from_timestamp_insertion = f"'{from_timestamp}'"
+        insert_statement = CypherQueryGenerator.insert_relation(from_node=from_id, to_node=to_id, node_type="Page", id_field="id", properties=f"{{from_timestamp: {from_timestamp_insertion}, to_timestamp: {to_timestamp_insertion}}}", relation_name="LINKS_TO")
         return insert_statement
