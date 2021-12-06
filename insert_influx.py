@@ -102,8 +102,7 @@ def get_average_number_of_hits_for_a_range_multiple_page_ids(page_ids):
        '|> group(columns: ["_measurement"], mode:"by")'
        '|> mean(column: "_value")')
 
-def get_page_with_highest_hits_in_a_range():
-    return "" + \
+get_page_with_highest_hits_in_a_range = "" + \
     (f'from(bucket: "{bucket}")'
        '|> range(start: timestart, stop: timestop)'
        '|> filter(fn: (r) => r["_measurement"] == "pageview")'
@@ -113,8 +112,7 @@ def get_page_with_highest_hits_in_a_range():
        '|> highestMax(n: 2, groupColumns: ["_value"])')
 
 
-def get_sliding_window_for_page():
-    return "" + \
+get_sliding_window_for_page = "" + \
     (f'from(bucket: "{bucket}")'
        '|> range(start: timestart, stop: timestop)'
        '|> filter(fn: (r) => r["_measurement"] == "pageview")'
