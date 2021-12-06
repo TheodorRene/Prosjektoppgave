@@ -2,7 +2,6 @@ import mysql.connector
 from neo4j import GraphDatabase
 from config import pagelinks_config as c
 from config import config as c2
-from json import dumps
 from datetime import datetime
 
 def get_query():
@@ -36,7 +35,7 @@ def get_query_pagelinks_complete():
 def get_correct_format(x):
     return f"{x[0]} {x[1].decode()} {x[2]} {x[3].decode()}"
 
-def get_n4j_query(x, format=False):
+def get_n4j_query():
     cypher_escaped = "MERGE (p1:Page {id:$from_page_id, title:$from_page_title}) " + \
               "MERGE (p2:Page {id:$to_page_id, title:$to_page_title}) "  + \
         "CREATE (p1) -[rel:LINKS_TO{timestamp:$timestamp}]-> (p2) "
@@ -99,7 +98,7 @@ if __name__=="__main__":
             print(datetime.now().time(), "Starting to insert data")
             for x in result:
                 kwargs = get_kwargs(x)
-                s.write_transaction(do_query_with_args, get_n4j_query(x), kwargs)
+                s.write_transaction(do_query_with_args, get_n4j_query(), kwargs)
             print(datetime.now().time(), "Finito")
 
 

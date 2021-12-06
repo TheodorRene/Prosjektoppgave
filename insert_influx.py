@@ -70,14 +70,6 @@ def do_job(write_api, filepath):
             else:
                 print(point)
 
-number_of_hits_for_a_range_page_id = "" + \
-    (f'from(bucket: "{bucket}")'
-       '|> range(start: timestart, stop: timestop)'
-       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
-       '|> filter(fn: (r) => r["_field"] == "hits")'
-       '|> filter(fn: (r) => r["page_id"] == page_id)'
-       '|> sum(column: "_value")')
-
 def get_number_of_hits_for_a_range_multiple_page_ids(page_ids):
     """Get all views for all the provided page ids"""
     regex = parse_multiple_id_regex(page_ids)
