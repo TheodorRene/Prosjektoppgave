@@ -1,6 +1,6 @@
 from config import influx_config, config as neo_config
 from datetime import datetime
-from perf_time_functions import time_func_avg
+from perf_time_functions import time_func_avg, time_func
 
 
 from influxdb_client import InfluxDBClient
@@ -93,18 +93,17 @@ def exe_Q1_influx(query_api):
 #Q2
 # Erna_Solberg
 Q2_page_id=309272
-Q2_datestart = datetime(year=2021, month=9, day=1, hour=1, minute=30)
-Q2_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30)
+Q2_datestart = datetime(year=2021, month=9, day=1, hour=1, minute=30).isoformat()
+Q2_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30).isoformat()
 
-@time_func_avg
+@time_func
 def exe_Q2_neo(graph):
     exe_general(DB.NEO, graph, Q2_neo(Q2_datestart, Q2_datestop), {"page_id":Q2_page_id})
 
 
-@time_func_avg
+@time_func
 def exe_Q2_influx(q_api):
     exe_general(DB.INFLUX, q_api, Q2_influx ,{"page_id":Q2_page_id,"timestart":Q2_datestart, "timestop":Q2_datestop})
-            
 
 
 if __name__=="__main__":
