@@ -14,7 +14,7 @@ def debuglog(text):
     if c["debug"]:
         print(datetime.now(), text)
 
-bucket="pageviews_b"
+bucket="pageviews_b_namespace_eq_0"
 org=c["org"]
 
 def getClient():
@@ -60,13 +60,14 @@ def parse_line(line):
     except:
         debuglog("Could not parse: " + line)
 
-def do_job(write_api, filepath):
+def do_job(write_api, filepath, valid_pages):
     with open(filepath, "r") as f:
         for line in f:
             pageview=parse_line(line)
             point=getPoint(pageview)
             if not c["dry_run"]:
-                insertPoint(write_api, point)
+                if pageview.page_id in valid_pages:
+                    insertPoint(write_api, point)
             else:
                 print(point)
 
@@ -158,6 +159,9 @@ if __name__=="__main__":
         print(do_query(query_api, get_average_number_of_hits_for_a_range_multiple_page_ids(page_ids), get_payload("_")))
     else:
         filepath = argv[1]
-        do_job(write_api, filepath)
-    write_api.close()   
+        f = open("pages_with_namespace_eq_0.txt", "r")
+        valid_pages = [int(el) for el in f]
+        f.close()
+        do_job(write_api, filepath, valid_pages)
+    write_api.close()
 
