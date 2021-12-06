@@ -102,6 +102,24 @@ def get_average_number_of_hits_for_a_range_multiple_page_ids(page_ids):
        '|> group(columns: ["_measurement"], mode:"by")'
        '|> mean(column: "_value")')
 
+get_page_with_highest_hits_in_a_range = "" + \
+    (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
+       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
+       '|> filter(fn: (r) => r["_field"] == "hits")'
+       '|> sum(column: "_value")'
+       '|> mean(column: "_value")'
+       '|> highestMax(n: 2, groupColumns: ["_value"])')
+
+
+get_sliding_window_for_page = "" + \
+    (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
+       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
+       '|> filter(fn: (r) => r["_field"] == "hits")'
+       f'|> filter(fn: (r) => r["page_id"] == page_id)'
+       '|> timedMovingAverage(every: 60m, period: 60m)')
+
 def parse_multiple_id_regex(ids):
     """Parses ids to the form "/^(x|y|z)$/"""
     string_ids = [str(id) for id in ids]
@@ -115,7 +133,7 @@ def do_query(query_api, query, params):
     results = []
     for table in result:
         for record in table.records:
-            results.append((record.get_value()))
+            results.append((record.values.get("page_id"), record.get_value()))
     return results
 
 day_start=datetime(year=2021, month=9, day=1, hour=0, minute=1)
