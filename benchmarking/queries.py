@@ -10,6 +10,7 @@ Q1_neo = "" +\
 
 Q1_influx = "" + \
     (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
        '|> filter(fn: (r) => r["_measurement"] == "pageview")'
        '|> filter(fn: (r) => r["_field"] == "hits")'
        '|> filter(fn: (r) => r["page_id"] == page_id)'
@@ -31,7 +32,6 @@ def Q2_neo(from_time, to_time):
          f"WHERE p2.timestamp >= datetime({from_time}) AND p3.timestamp <= datetime({to_time}) "
          "WITH sum (p3.count) as total "
          "RETURN total ")
-    
     return query
 
 # number_of_hits_for_a_range_page_id

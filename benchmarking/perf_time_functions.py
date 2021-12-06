@@ -4,16 +4,15 @@ repeats = 10
 
 def time_func_avg(func):
     def wrapFunc(*args, **kwargs):
-        sum = 0 
+        sum = 0
         for _ in range(repeats):
             start = perf_counter()
             func(*args, **kwargs)
             stop = perf_counter()
             sum += (stop-start)
-        print("Average: ", func.__name__, str(sum/repeats))
+        print("avg," + func.__name__ + ","+str(sum/repeats))
     return wrapFunc
 
-        
 def time_func(func):
     def wrapFunc(*args, **kwargs):
         start = perf_counter()
@@ -31,10 +30,10 @@ def gurba(hei):
 def gurba2(hei):
     return [hei for _ in range(1000)]
 
-gurba("hei")
+#gurba("hei")
 
-time_func(gurba2)("hei")
-time_func_avg(gurba2)("hei")
+#time_func(gurba2)("hei")
+#time_func_avg(gurba2)("hei")
 
 
 
