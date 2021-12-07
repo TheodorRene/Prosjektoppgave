@@ -27,11 +27,18 @@ def Q2_neo(from_time, to_time):
     :param to_time: The end of the interval, in ISO date format.
     """
     query = "" + \
-        ("MATCH (page:Page{id:$page_id}) "
-         "MATCH (page)-[:FIRST]->(p1:PageView)-[:NEXT*0..]->(p2:PageView)-[:NEXT*0..]->(p3:PageView) "
-         f"WHERE p2.timestamp >= datetime('{from_time}') AND p3.timestamp <= datetime('{to_time}') "
-         "WITH sum (p3.count) as total "
-         "RETURN total ")
+        ("MATCH (page:Page) "
+            "CALL { "
+            "WITH page "
+            "MATCH (page)-[:FIRST]->(p1:PageView)-[:NEXT*0..]->(p2:PageView)-[:NEXT*0..]->(p3:PageView) "
+            f"WHERE p2.timestamp >= datetime('{from_time}') AND p3.timestamp <= datetime('{to_time}') "
+            "WITH sum (p3.count) as total "
+            "RETURN total "
+            "LIMIT 1 "
+        "} "
+
+        "RETURN page, total "
+        "LIMIT 1000;")
     return query
 
 # number_of_hits_for_a_range_page_id
