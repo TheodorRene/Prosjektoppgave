@@ -53,3 +53,14 @@ Q2_influx = "" + \
 """
 Q3
 """
+# get_page_with_highest_hits_in_a_range
+Q3_influx= "" + \
+    (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
+       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
+       '|> filter(fn: (r) => r["_field"] == "hits")'
+       '|> sum(column: "_value")'
+       '|> mean(column: "_value")'
+       '|> highestMax(n: 1, groupColumns: ["_value"])')
+
+Q3_neo = "Too slow"
