@@ -1,4 +1,3 @@
-from utils import parse_multiple_id_regex
 bucket = "pageviews_b_namespace_eq_0"
 """
 How many people visited P_i in total?
@@ -23,12 +22,11 @@ Q2: How many people visited P_i in T_i
 """
 def Q2_neo(from_time, to_time):
     """
-    Get pageviews for pages in a given range.
     :param from_time: The start of the interval, in ISO date format.
     :param to_time: The end of the interval, in ISO date format.
     """
     query = "" + \
-        ("MATCH (page:Page) "
+        ("MATCH (page:Page{id:$page_id}) "
             "CALL { "
             "WITH page "
             "MATCH (page)-[:FIRST]->(p1:PageView)-[:NEXT*0..]->(p2:PageView)-[:NEXT*0..]->(p3:PageView) "
