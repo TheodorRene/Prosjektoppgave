@@ -1,3 +1,4 @@
+from utils import parse_multiple_id_regex
 bucket = "pageviews_b_namespace_eq_0"
 """
 How many people visited P_i in total?
@@ -64,3 +65,21 @@ Q3_influx= "" + \
        '|> highestMax(n: 1, groupColumns: ["_value"])')
 
 Q3_neo = "Too slow"
+
+"""
+Q4
+"""
+
+#def get_average_number_of_hits_for_a_range_multiple_page_ids(page_ids):
+def Q4_influx():
+    """Calculate the average views for the provided page ids"""
+    return "" + \
+    (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
+       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
+       '|> filter(fn: (r) => r["_field"] == "hits")'
+       '|> sum(column: "_value")'
+       '|> group(columns: ["_measurement"], mode:"by")'
+       '|> mean(column: "_value")')
+
+Q4_neo = "Too slow"

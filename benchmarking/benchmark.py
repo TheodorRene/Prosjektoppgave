@@ -1,6 +1,7 @@
 from config import influx_config, config as neo_config
 from datetime import datetime
 from perf_time_functions import time_func_avg, time_func
+from typing import Any, Dict
 
 
 from influxdb_client import InfluxDBClient
@@ -47,7 +48,7 @@ class DB(Enum):
     INFLUX = auto()
 
 
-def exe_general(db_type, connection,query, params=None):
+def exe_general(db_type:DB, connection,query:str, params:Dict[str,Any]=None) -> None :
     """
     This shouldve been a Class, reinventing the wheel here
     """
@@ -62,6 +63,10 @@ def exe_general(db_type, connection,query, params=None):
                 )
         if show_data:
             print_influx(result)
+
+def exe_too_slow(func):
+    print("average,"+ func.__name__ + "," + Q3_neo)
+
 # END CONFIG/Boilerplate
 
 
@@ -110,7 +115,7 @@ Q3_datestart = datetime(year=2021, month=9, day=1, hour=1, minute=30)
 Q3_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30)
 
 def exe_Q3_neo():
-    print("average,exe_Q3_neo," + Q3_neo)
+    exe_too_slow(exe_Q3_neo)
 
 @time_func_avg
 def exe_Q3_influx(q_api):
@@ -119,6 +124,14 @@ def exe_Q3_influx(q_api):
             Q3_influx,
             {"timestart":Q3_datestart, "timestop":Q3_datestop})
 
+# Q4
+
+@time_func_avg
+def exe_q4_influx(q_api):
+    exe_general(DB.INFLUX, q_api, Q4_neo)
+
+def exe_q4_neo():
+    exe_too_slow(exe_q4_neo)
 
 
 
@@ -134,4 +147,7 @@ if __name__=="__main__":
 
     exe_Q3_neo()
     exe_Q3_influx(query_api)
+    
+    exe_q4_neo()
+    exe_q4_influx(query_api)
 
