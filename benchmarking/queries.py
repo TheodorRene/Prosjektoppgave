@@ -22,11 +22,12 @@ Q2: How many people visited P_i in T_i
 """
 def Q2_neo(from_time, to_time):
     """
+    TODO: This one does not make sense. does not answer the query
     :param from_time: The start of the interval, in ISO date format.
     :param to_time: The end of the interval, in ISO date format.
     """
     query = "" + \
-        ("MATCH (page:Page{id:$page_id}) "
+        ("MATCH (page:Page) "
             "CALL { "
             "WITH page "
             "MATCH (page)-[:FIRST]->(p1:PageView)-[:NEXT*0..]->(p2:PageView)-[:NEXT*0..]->(p3:PageView) "
