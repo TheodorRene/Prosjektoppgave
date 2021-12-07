@@ -1,13 +1,14 @@
-from config import influx_config, config as neo_config
 from datetime import datetime
-from perf_time_functions import time_func_avg, time_func
+from enum import Enum, auto
 from typing import Any, Dict
 
+from config import influx_config, config as neo_config
+from perf_time_functions import time_func_avg, time_func
+from queries import *
 
 from influxdb_client import InfluxDBClient
 from py2neo import Graph
 
-from queries import *
 
 # CONFIG
 bucket="pageviews_b_namespace_eq_0"
@@ -42,7 +43,6 @@ def print_influx(result):
             results.append((record.values.get("page_id"), record.get_value()))
     print(results)
 
-from enum import Enum, auto
 class DB(Enum):
     NEO = auto()
     INFLUX = auto()
@@ -66,6 +66,9 @@ def exe_general(db_type:DB, connection,query:str, params:Dict[str,Any]=None) -> 
 
 def exe_too_slow(func):
     print("average,"+ func.__name__ + "," + "Too slow")
+
+def print_header():
+    print("metric type, query name, time(s)")
 
 # END CONFIG/Boilerplate
 
@@ -127,7 +130,9 @@ def exe_Q3_influx(q_api):
 # Q4
 
 Q4_datestart = datetime(year=2021, month=9, day=1, hour=1, minute=30)
+
 Q4_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30)
+
 @time_func_avg
 def exe_q4_influx(q_api):
     exe_general(DB.INFLUX, q_api, Q4_influx, {"timestart":Q4_datestart, "timestop":Q4_datestart})
@@ -135,12 +140,11 @@ def exe_q4_influx(q_api):
 def exe_q4_neo():
     exe_too_slow(exe_q4_neo)
 
-
-
 if __name__=="__main__":
     query_api = getInfluxClient().query_api()
     graph = getNeo4jDriver()
 
+    print_header()
     exe_Q1_influx(query_api)
     exe_Q1_neo(graph)
 
