@@ -93,12 +93,12 @@ def exe_Q1_influx(query_api):
 #Q2
 # Erna_Solberg
 Q2_page_id=309272
-Q2_datestart = datetime(year=2021, month=9, day=1, hour=1, minute=30).isoformat()
-Q2_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30).isoformat()
+Q2_datestart = datetime(year=2021, month=9, day=1, hour=1, minute=30)
+Q2_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30)
 
 @time_func
 def exe_Q2_neo(graph):
-    exe_general(DB.NEO, graph, Q2_neo(Q2_datestart, Q2_datestop), {"page_id":Q2_page_id})
+    exe_general(DB.NEO, graph, Q2_neo(Q2_datestart.isoformat(), Q2_datestop.isoformat()), {"page_id":Q2_page_id})
 
 
 @time_func
