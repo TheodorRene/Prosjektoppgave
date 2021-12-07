@@ -71,9 +71,7 @@ Q4
 """
 
 #def get_average_number_of_hits_for_a_range_multiple_page_ids(page_ids):
-def Q4_influx():
-    """Calculate the average views for the provided page ids"""
-    return "" + \
+Q4_influx = "" + \
     (f'from(bucket: "{bucket}")'
        '|> range(start: timestart, stop: timestop)'
        '|> filter(fn: (r) => r["_measurement"] == "pageview")'

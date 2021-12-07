@@ -128,7 +128,7 @@ def exe_Q3_influx(q_api):
 
 @time_func_avg
 def exe_q4_influx(q_api):
-    exe_general(DB.INFLUX, q_api, Q4_neo)
+    exe_general(DB.INFLUX, q_api, Q4_influx)
 
 def exe_q4_neo():
     exe_too_slow(exe_q4_neo)
