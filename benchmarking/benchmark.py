@@ -65,7 +65,7 @@ def exe_general(db_type:DB, connection,query:str, params:Dict[str,Any]=None) -> 
             print_influx(result)
 
 def exe_too_slow(func):
-    print("average,"+ func.__name__ + "," + Q3_neo)
+    print("average,"+ func.__name__ + "," + "Too slow")
 
 # END CONFIG/Boilerplate
 
@@ -126,9 +126,11 @@ def exe_Q3_influx(q_api):
 
 # Q4
 
+Q4_datestart = datetime(year=2021, month=9, day=1, hour=1, minute=30)
+Q4_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30)
 @time_func_avg
 def exe_q4_influx(q_api):
-    exe_general(DB.INFLUX, q_api, Q4_influx)
+    exe_general(DB.INFLUX, q_api, Q4_influx, {"timestart":Q4_datestart, "timestop":Q4_datestart})
 
 def exe_q4_neo():
     exe_too_slow(exe_q4_neo)
