@@ -135,7 +135,7 @@ Q4_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30)
 
 @time_func_avg
 def exe_q4_influx(q_api):
-    exe_general(DB.INFLUX, q_api, Q4_influx, {"timestart":Q4_datestart, "timestop":Q4_datestart})
+    exe_general(DB.INFLUX, q_api, Q4_influx, {"timestart":Q4_datestart, "timestop":Q4_datestop})
 
 def exe_q4_neo():
     exe_too_slow(exe_q4_neo)
