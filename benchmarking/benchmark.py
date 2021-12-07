@@ -110,7 +110,7 @@ Q3_datestart = datetime(year=2021, month=9, day=1, hour=1, minute=30)
 Q3_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30)
 
 def exe_Q3_neo():
-    print(Q3_neo)
+    print("average,exe_Q3_neo," + Q3_neo)
 
 @time_func_avg
 def exe_Q3_influx(q_api):
