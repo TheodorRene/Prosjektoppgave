@@ -32,7 +32,7 @@ def Q2_neo(from_time, to_time):
             "WITH page "
             "MATCH (page)-[:FIRST]->(p1:PageView)-[:NEXT*0..]->(p2:PageView)-[:NEXT*0..]->(p3:PageView) "
             f"WHERE p2.timestamp >= datetime('{from_time}') AND p3.timestamp <= datetime('{to_time}') "
-            "WITH sum (p3.count) as total "
+            "WITH p2, sum (p2.count) as total "
             "RETURN total "
             "LIMIT 1 "
         "} "
