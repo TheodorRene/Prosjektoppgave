@@ -37,7 +37,7 @@ def Q2_neo(from_time, to_time):
             "} "
 
             "RETURN page, total "
-            "LIMIT 1000;")
+            "LIMIT 1;")
     return query
 
 # number_of_hits_for_a_range_page_id
@@ -79,3 +79,12 @@ Q4_influx = "" + \
        '|> mean(column: "_value")')
 
 Q4_neo = "Too slow"
+
+
+"""
+Q6
+"""
+Q6_influx = Q2_influx
+
+Q6_get_timestamps = "" + \
+"MATCH (p {id:$page_id})-[r:LINKED_TO]->() RETURN DISTINCT r.from_timestamp ORDER BY r.from_timestamp ASC;"

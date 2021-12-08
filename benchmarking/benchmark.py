@@ -1,10 +1,12 @@
 from datetime import datetime
+
 from enum import Enum, auto
 from typing import Any, Dict
 
 from config import influx_config, config as neo_config
 from perf_time_functions import time_func_avg, time_func
 from queries import *
+from utils import get_revision_intervals
 
 from influxdb_client import InfluxDBClient
 from py2neo import Graph
@@ -63,6 +65,16 @@ def exe_general(db_type:DB, connection,query:str, params:Dict[str,Any]=None) -> 
                 )
         if show_data:
             print_influx(result)
+
+def exe_return(db_type:DB, connection, query:str, params:Dict[str, Any]=None):
+    if db_type == DB.NEO:
+        return connection.run(query, params)
+    
+    return connection.query(org=org,
+            query=query,
+            params=params
+            )
+
 
 def exe_too_slow(func):
     print("average,"+ func.__name__ + "," + "Too slow")
@@ -140,6 +152,29 @@ def exe_q4_influx(q_api):
 def exe_q4_neo():
     exe_too_slow(exe_q4_neo)
 
+# Q6
+
+Q6_page_id=309272
+
+@time_func_avg
+def exe_q6_influx(graph, q_api):
+    data = exe_return(DB.NEO, graph, Q6_get_timestamps, {"page_id": Q6_page_id}).data()
+    intervals = get_revision_intervals([result["r.from_timestamp"] for result in data])
+    for interval in intervals:
+        timestart, timestop = interval
+        timestart = datetime.fromisoformat(timestart)
+        timestop = datetime.fromisoformat(timestop)
+        exe_general(DB.INFLUX, q_api, Q6_influx, {"page_id": Q6_page_id, "timestart": timestart, "timestop": timestop})
+
+@time_func_avg
+def exe_q6_neo(q_api):
+    data = exe_return(DB.NEO, q_api, Q6_get_timestamps, {"page_id": Q6_page_id}).data()
+    intervals = get_revision_intervals([result["r.from_timestamp"] for result in data])
+    for interval in intervals:
+        exe_too_slow(exe_q4_neo)
+
+
+
 if __name__=="__main__":
     query_api = getInfluxClient().query_api()
     graph = getNeo4jDriver()
@@ -156,4 +191,7 @@ if __name__=="__main__":
     
     exe_q4_neo()
     exe_q4_influx(query_api)
+
+    exe_q6_influx(graph, query_api)
+    exe_q6_neo(graph)
 
