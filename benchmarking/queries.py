@@ -1,3 +1,5 @@
+from utils import parse_multiple_id_regex
+
 bucket = "pageviews_b_namespace_eq_0"
 """
 How many people visited P_i in total?
@@ -88,3 +90,39 @@ Q6_influx = Q2_influx
 
 Q6_get_timestamps = "" + \
 "MATCH (p:Page{id:$page_id})-[r:LINKED_TO]->(Page) RETURN DISTINCT r.from_timestamp ORDER BY r.from_timestamp ASC;"
+
+
+def Q7_get_communities(graph_name):
+    """Find clusters with the Louvain community algorithm."""
+    return ("" + \
+        f"CALL gds.louvain.stream('{graph_name}') "
+        "YIELD nodeId, communityId "
+        "RETURN gds.util.asNode(nodeId).id AS id, communityId "
+        "ORDER BY id ASC;"
+    )
+    return result.data()
+
+def _Q7_create_graph_if_nonexistent(graph_name, timestamp, query_api):
+    exist_result = query_api.run(f"CALL gds.graph.exists('{graph_name}') YIELD exists")
+    if not exist_result.data()[0].get("exists"):
+        
+        query_api.run("" + \
+            "CALL gds.graph.create.cypher("
+                f"'{graph_name}', "
+                "'MATCH (p:Page) RETURN id(p) AS id', "
+                "'MATCH (p:Page)-[r:LINKED_TO]->(q:Page)"
+                f""" WHERE r.from_timestamp < "{timestamp}" AND "{timestamp}" < r.to_timestamp"""
+                " RETURN id(p) AS source, id(q) AS target') "
+            "YIELD "
+            "graphName AS graph, nodeQuery, nodeCount AS nodes, relationshipQuery, relationshipCount AS rels;")
+
+
+def Q7_influx(page_ids):
+    regex = parse_multiple_id_regex(page_ids)
+    return "" + \
+    (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
+       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
+       '|> filter(fn: (r) => r["_field"] == "hits")'
+       f'|> filter(fn: (r) => r["page_id"] =~ {regex})'
+       '|> sum(column: "_value")')
