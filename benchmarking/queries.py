@@ -87,4 +87,4 @@ Q6
 Q6_influx = Q2_influx
 
 Q6_get_timestamps = "" + \
-"MATCH (p {id:$page_id})-[r:LINKED_TO]->() RETURN DISTINCT r.from_timestamp ORDER BY r.from_timestamp ASC;"
+"MATCH (p:Page{id:$page_id})-[r:LINKED_TO]->(Page) RETURN DISTINCT r.from_timestamp ORDER BY r.from_timestamp ASC;"
