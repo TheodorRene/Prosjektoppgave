@@ -98,7 +98,7 @@ def Q7_get_communities(graph_name):
         f"CALL gds.louvain.stream('{graph_name}') "
         "YIELD nodeId, communityId "
         "RETURN gds.util.asNode(nodeId).id AS id, communityId "
-        "ORDER BY id ASC;"
+        "ORDER BY communityId ASC;"
     )
     return result.data()
 
@@ -126,3 +126,16 @@ def Q7_influx(page_ids):
        '|> filter(fn: (r) => r["_field"] == "hits")'
        f'|> filter(fn: (r) => r["page_id"] =~ {regex})'
        '|> sum(column: "_value")')
+
+def Q8_get_communities(graph_name):
+    return Q7_get_communities(graph_name)
+
+def Q8_influx(page_ids):
+    regex = parse_multiple_id_regex(page_ids)
+    return "" + \
+    (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
+       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
+       '|> filter(fn: (r) => r["_field"] == "hits")'
+       f'|> filter(fn: (r) => r["page_id"] =~ {regex})'
+       '|> mean(column: "_value")')

@@ -16,3 +16,14 @@ def get_page_ids_by_community_id(community_response, page_id):
 
 def get_community_id_by_page_id(community_response, page_id):
     return next(element["communityId"] for element in community_response if element["id"] == page_id)
+
+def group_communities_by_id(community_response):
+    thing = {}
+    for record in community_response:
+        communityId = record["communityId"]
+        if communityId not in thing.keys():
+            thing[communityId] = [record["id"]]
+        else:
+            thing[communityId].append(record["id"])
+
+    return thing

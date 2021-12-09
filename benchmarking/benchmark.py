@@ -195,6 +195,25 @@ def exe_q7_influx(graph, q_api):
     page_ids = get_page_ids_by_community_id(communities, Q7_page_id)
     exe_general(DB.INFLUX, q_api, Q7_influx(page_ids), {"timestart": Q7_interval_start, "timestop": Q7_interval_end})
 
+# Q8
+
+Q8_interval_start = Q7_interval_start
+Q8_timestamp = Q7_timestamp
+Q8_interval_end = Q7_interval_end
+
+Q8_gds_graphname = Q7_gds_graphname
+
+@time_func_avg
+def exe_q8_neo(q_api):
+    communities = exe_return(DB.NEO, q_api, Q8_get_communities(Q8_gds_graphname)).data()
+    grouped_communities = group_communities_by_id(communities)
+
+@time_func_avg
+def exe_q8_influx(graph, q_api):
+    communities = exe_return(DB.NEO, graph, Q8_get_communities(Q8_gds_graphname)).data()
+    grouped_communities = group_communities_by_id(communities)
+    for page_ids in grouped_communities.items():
+        exe_general(DB.INFLUX, q_api, Q8_influx(page_ids), {"timestart": Q8_interval_start, "timestop": Q8_interval_end})
 
 
 if __name__=="__main__":
@@ -217,9 +236,12 @@ if __name__=="__main__":
 
     exe_q6_influx(graph, query_api)
     exe_q6_neo(graph)
-    """
+    
 
     _Q7_create_graph_if_nonexistent(Q7_gds_graphname, Q7_timestamp, graph)
     exe_q7_influx(graph, query_api)
     exe_q7_neo(graph)
+    """
 
+    exe_q8_influx(graph, query_api)
+    exe_q8_neo(graph)
