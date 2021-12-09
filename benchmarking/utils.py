@@ -6,5 +6,5 @@ def parse_multiple_id_regex(ids):
     pipe_separated_ids = "|".join(string_ids)
     return f"/^({pipe_separated_ids})$/"
 
-def get_revision_intervals(timestamps:list) -> List[tuple]:
+def get_revision_intervals(timestamps:List[str]) -> List[tuple]:
     return [(timestamps[i], timestamps[i+1]) for i in range(0, len(timestamps)-1)]
