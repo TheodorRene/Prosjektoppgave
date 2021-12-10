@@ -10,7 +10,7 @@ def time_func_avg(func):
             func(*args, **kwargs)
             stop = perf_counter()
             sum += (stop-start)
-        print("avg," + func.__name__ + ","+ str(sum/repeats))
+        print(f"avg, {func.__name__}, {str(sum/repeats)}, {args}")
     return wrapFunc
 
 def time_func(func):

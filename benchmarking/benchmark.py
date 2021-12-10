@@ -179,6 +179,7 @@ cypher_pageviews_interval_end = Q4_datestop
 @time_func_avg
 def exe_cypher_benchmark(q_api, limit):
     data = exe_return(DB.NEO, q_api, cypher_pageviews_interval(cypher_pageviews_interval_start, cypher_pageviews_interval_end, limit))
+    print(data.data())
 
 
 if __name__=="__main__":
@@ -203,5 +204,6 @@ if __name__=="__main__":
     """
 
 
-    for limit in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]:
+    #for limit in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]:
+    for limit in [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000]:
         exe_cypher_benchmark(graph, limit)
