@@ -173,12 +173,18 @@ def exe_q6_neo(q_api):
     for interval in intervals:
         exe_too_slow(exe_q4_neo)
 
+cypher_pageviews_interval_start = Q4_datestart
+cypher_pageviews_interval_end = Q4_datestop
+
+@time_func_avg
+def exe_cypher_benchmark(q_api, limit):
+    data = exe_return(DB.NEO, q_api, cypher_pageviews_interval(cypher_pageviews_interval_start, cypher_pageviews_interval_end, limit))
 
 
 if __name__=="__main__":
     query_api = getInfluxClient().query_api()
     graph = getNeo4jDriver()
-
+    """
     print_header()
     exe_Q1_influx(query_api)
     exe_Q1_neo(graph)
@@ -194,4 +200,8 @@ if __name__=="__main__":
 
     exe_q6_influx(graph, query_api)
     exe_q6_neo(graph)
+    """
 
+
+    for limit in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]:
+        exe_cypher_benchmark(graph, limit)

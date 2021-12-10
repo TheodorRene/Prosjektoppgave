@@ -30,7 +30,7 @@ def Q2_neo(from_time, to_time):
             "CALL { "
             "WITH page "
             "MATCH (page)-[:FIRST]->(p1:PageView)-[:NEXT*0..]->(p2:PageView)-[:NEXT*0..]->(p3:PageView) "
-            f"WHERE p2.timestamp >= datetime('{from_time}') AND p3.timestamp <= datetime('{to_time}') "
+            f"WHERE p2.timestamp >= '{from_time}' AND p3.timestamp <= '{to_time}' "
             "WITH p2, sum (p2.count) as total "
             "RETURN total "
             "LIMIT 1 "
@@ -88,3 +88,27 @@ Q6_influx = Q2_influx
 
 Q6_get_timestamps = "" + \
 "MATCH (p:Page{id:$page_id})-[r:LINKED_TO]->(Page) RETURN DISTINCT r.from_timestamp ORDER BY r.from_timestamp ASC;"
+
+
+
+
+
+def cypher_pageviews_interval(from_time, to_time, limit):
+    """
+    :param from_time: The start of the interval, in ISO date format.
+    :param to_time: The end of the interval, in ISO date format.
+    """
+    query = "" + \
+            ("MATCH (page:Page) "
+            "CALL { "
+            "WITH page "
+            "MATCH (page)-[:FIRST]->(p1:PageView)-[:NEXT*0..]->(p2:PageView)-[:NEXT*0..]->(p3:PageView) "
+            f"WHERE p2.timestamp >= '{from_time}' AND p3.timestamp <= '{to_time}' "
+            "WITH p2, sum (p2.count) as total "
+            "RETURN total "
+            "LIMIT 1 "
+            "} "
+
+            "RETURN page, total "
+            f"LIMIT {limit};")
+    return query
