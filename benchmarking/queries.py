@@ -82,6 +82,16 @@ Q4_influx = "" + \
 
 Q4_neo = "Too slow"
 
+"""
+Q5
+"""
+Q5_influx = "" + \
+    (f'from(bucket: "{bucket}")'
+       '|> range(start: timestart, stop: timestop)'
+       '|> filter(fn: (r) => r["_measurement"] == "pageview")'
+       '|> filter(fn: (r) => r["_field"] == "hits")'
+       f'|> filter(fn: (r) => r["page_id"] == page_id)'
+       '|> timedMovingAverage(every: 1m, period: 60m)')
 
 """
 Q6

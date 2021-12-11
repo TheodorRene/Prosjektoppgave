@@ -153,6 +153,18 @@ def exe_q4_influx(q_api):
 def exe_q4_neo():
     exe_too_slow(exe_q4_neo)
 
+# Q5
+
+Q5_page_id = 309272
+
+Q5_datestart = datetime(year=2021, month=9, day=1, hour=0, minute=0)
+Q5_datestop = datetime(year=2021, month=9, day=1, hour=23, minute=59)
+
+
+@time_func_avg
+def exe_q5_influx(q_api):
+    exe_general(DB.INFLUX, q_api, Q5_influx, {"page_id": Q5_page_id, "timestart": Q5_datestart, "timestop": Q5_datestop})
+
 # Q6
 
 Q6_page_id=309272
@@ -197,11 +209,12 @@ def exe_q7_influx(graph, q_api):
 
 
 
+
+
 if __name__=="__main__":
     query_api = getInfluxClient().query_api()
     graph = getNeo4jDriver()
 
-    """
     print_header()
     exe_Q1_influx(query_api)
     exe_Q1_neo(graph)
@@ -214,10 +227,10 @@ if __name__=="__main__":
     
     exe_q4_neo()
     exe_q4_influx(query_api)
+    exe_q5_influx(query_api)
 
     exe_q6_influx(graph, query_api)
     exe_q6_neo(graph)
-    """
 
     _Q7_create_graph_if_nonexistent(Q7_gds_graphname, Q7_timestamp, graph)
     exe_q7_influx(graph, query_api)
