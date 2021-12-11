@@ -6,7 +6,8 @@ from typing import Any, Dict
 from config import influx_config, config as neo_config
 from perf_time_functions import time_func_avg, time_func
 from queries import *
-from utils import get_revision_intervals
+from queries import _Q7_create_graph_if_nonexistent
+from utils import *
 
 from influxdb_client import InfluxDBClient
 from py2neo import Graph
@@ -185,6 +186,27 @@ def exe_q6_neo(q_api):
     for interval in intervals:
         exe_too_slow(exe_q4_neo)
 
+# Q7
+
+Q7_interval_start = datetime(year=2021, month=9, day=1, hour=7, minute=0)
+Q7_timestamp = datetime(year=2021, month=9, day=1, hour=7, minute=30)
+Q7_interval_end = datetime(year=2021, month=9, day=1, hour=8, minute=0)
+
+Q7_gds_graphname = "revisions-7-30"
+Q7_page_id=309272
+
+@time_func_avg
+def exe_q7_neo(q_api):
+    communities = exe_return(DB.NEO, graph, Q7_get_communities(Q7_gds_graphname))
+    page_ids = get_page_ids_by_community_id(communities, Q7_page_id)
+    exe_too_slow(exe_q4_neo)
+
+@time_func_avg
+def exe_q7_influx(graph, q_api):
+    communities = exe_return(DB.NEO, graph, Q7_get_communities(Q7_gds_graphname))
+    page_ids = get_page_ids_by_community_id(communities, Q7_page_id)
+    exe_general(DB.INFLUX, q_api, Q7_influx(page_ids), {"timestart": Q7_interval_start, "timestop": Q7_interval_end})
+
 
 
 
@@ -192,7 +214,7 @@ def exe_q6_neo(q_api):
 if __name__=="__main__":
     query_api = getInfluxClient().query_api()
     graph = getNeo4jDriver()
-    """
+
     print_header()
     exe_Q1_influx(query_api)
     exe_Q1_neo(graph)
@@ -205,9 +227,12 @@ if __name__=="__main__":
     
     exe_q4_neo()
     exe_q4_influx(query_api)
-    """
     exe_q5_influx(query_api)
 
     exe_q6_influx(graph, query_api)
     exe_q6_neo(graph)
+
+    _Q7_create_graph_if_nonexistent(Q7_gds_graphname, Q7_timestamp, graph)
+    exe_q7_influx(graph, query_api)
+    exe_q7_neo(graph)
 
