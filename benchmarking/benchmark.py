@@ -90,7 +90,9 @@ def print_header():
 
 # Q1
 # Erna_Solberg
-Q1_page_id=309272
+Q1_page_id_2=309272
+# Liste_over_politiske_partier
+Q1_page_id=78811
 
 @time_func_avg
 def exe_Q1_neo(graph):
@@ -112,16 +114,24 @@ def exe_Q1_influx(query_api):
 
 # Q2
 # Erna_Solberg
-Q2_page_id=309272
+Q2_page_id_redacted=309272
+
+# 1974
+Q2_page_id=4515
+
+#  Some other
+# Arbeidernes_kommunistparti
+Q2_page_id=64
+
 Q2_datestart = datetime(year=2021, month=9, day=1, hour=1, minute=30)
 Q2_datestop = datetime(year=2021, month=9, day=1, hour=7, minute=30)
 
-@time_func
+@time_func_avg
 def exe_Q2_neo(graph):
     exe_general(DB.NEO, graph, Q2_neo(Q2_datestart.isoformat(), Q2_datestop.isoformat()), {"page_id":Q2_page_id})
 
 
-@time_func
+@time_func_avg
 def exe_Q2_influx(q_api):
     exe_general(DB.INFLUX, q_api, Q2_influx ,{"page_id":Q2_page_id,"timestart":Q2_datestart, "timestop":Q2_datestop})
 
@@ -166,7 +176,10 @@ def exe_q5_influx(q_api):
 
 # Q6
 
-Q6_page_id=309272
+#Q6_page_id=309272
+#  Some other
+# Arbeidernes_kommunistparti
+Q6_page_id=64
 
 @time_func_avg
 def exe_q6_influx(graph, q_api):
@@ -179,11 +192,11 @@ def exe_q6_influx(graph, q_api):
         exe_general(DB.INFLUX, q_api, Q6_influx, {"page_id": Q6_page_id, "timestart": timestart, "timestop": timestop})
 
 @time_func_avg
-def exe_q6_neo(q_api):
-    data = exe_return(DB.NEO, q_api, Q6_get_timestamps, {"page_id": Q6_page_id}).data()
+def exe_q6_neo(graph):
+    data = exe_return(DB.NEO, graph, Q6_get_timestamps, {"page_id": Q6_page_id}).data()
     intervals = get_revision_intervals([result["r.from_timestamp"] for result in data])
-    for interval in intervals:
-        exe_too_slow(exe_q4_neo)
+    for (timestart, timestop) in intervals:
+        exe_general(DB.NEO, graph, Q2_neo(timestart, timestop), {"page_id":Q6_page_id})
 
 
 
@@ -192,20 +205,20 @@ def exe_q6_neo(q_api):
 if __name__=="__main__":
     query_api = getInfluxClient().query_api()
     graph = getNeo4jDriver()
-    """
+
     print_header()
-    exe_Q1_influx(query_api)
-    exe_Q1_neo(graph)
+    # exe_Q1_influx(query_api)
+    # exe_Q1_neo(graph)
 
-    exe_Q2_neo(graph)
-    exe_Q2_influx(query_api)
+    # exe_Q2_neo(graph)
+    # exe_Q2_influx(query_api)
 
-    exe_Q3_neo()
-    exe_Q3_influx(query_api)
-    
+    # exe_Q3_neo()
+    # exe_Q3_influx(query_api)
+
     exe_q4_neo()
     exe_q4_influx(query_api)
-    """
+
     exe_q5_influx(query_api)
 
     exe_q6_influx(graph, query_api)
